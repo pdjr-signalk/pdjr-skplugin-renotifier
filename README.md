@@ -8,8 +8,8 @@ to nominated recipients.
 
 ## System requirements
 
-1. Sendmail.
-2. A mobile phone dongle that supports SMS.
+1. For emai: sendmail plus a working connection to the Internet.
+2. ForSMS: gammu plus a supported 3G/4G dongle supported by Gammu
 
 ## Installation
 
