@@ -34,7 +34,7 @@ module.exports = function(app) {
 			type: "object",
 			properties: {
 				scan: {
-					title: "Scan disk for notifier scripts",
+					title: "Scan script directory",
 					type: "boolean",
 					default: true
 				},

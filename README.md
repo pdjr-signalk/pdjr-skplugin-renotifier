@@ -113,11 +113,13 @@ and installed using
 The plugin configuration page at _Server->Plugin config->Renotifier_ offers
 the following configuration options.
 
-__Rescan script directory__.  Checkbox requesting that the list of _Notifiers_
+__Scan script directory__.  Checkbox requesting that the list of _Notifiers_
 (see below) be re-built by scanning the plugin's `bin/` folder for
 executable scripts.
-Default is true (to cause the _Notifiers_ list to built on first execution),
-but the value is set false after a scan is completed.
+Default is true (to cause the _Notifiers_ list to built on first configuration),
+but is then set false.
+Check this option to re-initialise the list of notifiers (any configuration of
+existing entries in _Notifiers_ will be retained).
 
 __Trigger paths__.  A collection of potential Signal K notification paths 
 which are of interest to the plugin.
@@ -133,7 +135,7 @@ __Notifiers__.  A list of notifier scripts and their options.
 Default is the list of all notifier scripts in the `bin/` folder in the
 plugin's installation directory.
 Entries in the list can be deleted and the list can be re-built (by re-scanning
-the `bin/` folder) using the _Rescan script directory_ option described above.
+the `bin/` folder) using the _Scan script directory_ option described above.
 Each notifier in the list can be configured through the following options.
 
 __Name__.  The name of the notifier (actually the filename of the notifier
