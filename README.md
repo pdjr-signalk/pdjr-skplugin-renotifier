@@ -29,7 +29,7 @@ external _notifier scripts_ that the plugin executes.
 The plugin ships with two example scripts for sending SMS texts and emails and
 the requirements of each of these are discussed below.
 
-### `bin/SMS` send notifications by SMS
+### SMS - send notifications by SMS text
 
 To be able to send SMS messages a computer must have access to a cellular
 modem or a mobile phone that supports remote control and a software stack that
@@ -49,7 +49,7 @@ part of most Linux distributions.
 _Gammu_ has out-of-the-box support for the Huawei E353 (but not for all
 USB cellular modems...).
 
-### `bin/Email`
+### Email - send notifications by electronic mail
 
 For the plugin to be able to send email the host system must have a working
 mail transfer agent (MTA) and a supporting mechanism for permanent or on-demand
@@ -119,12 +119,49 @@ Use the dropdown list to select the required triggers.
 
 __Arguments__.  A comma or space separated list of values which should be
 passed to the notifier script as arguments.
-The meaning of these values is script dependent, but for scripts which
-implement some kind of communication it is sensible if these indicate the
-recipient of the notification.
+The meaning of these values is script dependent (see _Description_ above),
+but for scripts which implement some kind of communication these will likely
+indicate the recipient of the notification.
 For example, in the case of the `SMS` notifier script included in the plugin
-distribution this option should include a list of the cellphone numbers of
+distribution this option should include a list of the cellphone numbers
 to which notification texts should be sent.
+
+### Notifier scripts
+
+Notifier scripts are shell scripts or executables located in the `bin/`
+folder under the plugin installation directory.
+Scripts must be executable by the owner of the executing Signale K Node server.
+
+__signalk-renotifier__ executes a script by passing the text of the
+notification as the script's standard input and the contents of the
+configuration _Arguments_ field as the script argument(s).
+For a script designed to send messages, the _Arguments_ field will typically
+contain a list of message addressees in whatever format suits the mode
+of communication: telephone numbers for SMS, email addresses for email,
+and so on.
+
+The plugin executes each notifier script once with no arguments and uses
+the return value as the contents of the _Description_ configuration option.
+
+The `SMS` script installed with the plugin is listed below.
+
+`
+#!/bin/bash
+# Send Signal K notifications by SMS
+
+if [ "$#" -eq 0 ]; then
+	echo "Send Signal K notifications by SMS (arguments must be phone numbers)"
+	exit 0
+fi
+ 
+GAMMU="/usr/bin/gammu"
+
+while [ "${1}" != "" ]; do
+#	COMMAND="$GAMMU sendsms TEXT ${1}"
+#	eval ${COMMAND} < &0
+#	shift
+done
+`
 
 ## Notifications, warnings and errors
 
