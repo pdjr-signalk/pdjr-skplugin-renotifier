@@ -1,0 +1,16 @@
+#!/bin/bash
+# Send Signal K notifications by SMS
+
+if [ "$#" -eq 0 ]; then
+	echo "Send Signal K notifications by SMS (arguments must be phone numbers)"
+	exit 0
+fi
+ 
+GAMMU="/usr/bin/gammu"
+
+while [ "${1}" != "" ]; do
+#	COMMAND="$GAMMU sendsms TEXT ${1}"
+#	eval ${COMMAND} < &0
+#	shift
+done
+

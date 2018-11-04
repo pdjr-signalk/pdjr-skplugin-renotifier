@@ -1,0 +1,23 @@
+{
+  "name": "signalk-renotifier",
+  "version": "1.0.0",
+  "description": "Take action on Signal K notifications",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/preeve9534/signalk-renotifier.git"
+  },
+  "keywords": [
+    "signalk-node-server-plugin",
+    "notification"
+  ],
+  "author": "Paul Reeve <paul@pdjr.eu>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/preeve9534/signalk-renotifier/issues"
+  },
+  "homepage": "https://github.com/preeve9534/signalk-renotifier#readme"
+}
