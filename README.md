@@ -19,6 +19,20 @@ The remaining part of this document focusses almost exclusively on the
 provison of SMS based notification using a cellular modem connected directly
 to the Signal K Node server host.
 
+## Principle of operation
+
+__signalk-renotifier__ is configured with a collection of Signal K
+notification paths called _trigger paths_ and a collection of notification
+scripts called _notifiers_.
+
+When the Signal K Node server receives a notification update relating to one
+of the trigger paths the plugin presents a notification opportunity to each
+notifier.
+Each notifier is configured with a set of _trigger states_ to which it should
+respond and if the state of the received notification update matches one of
+the configured trigger states then the notifier's external script  will be
+invoked.
+ 
 ## System requirements
 
 __signalk-renotifier__ has no special system requirements that must be met
@@ -96,12 +110,31 @@ and installed using
 
 ### Customising plugin operation
 
-The plugin configuration page at _Server->Plugin config->Renotifier_ lists each
-identified notifier and offers the following configuration options:
+The plugin configuration page at _Server->Plugin config->Renotifier_ offers
+the following configuration options.
 
-__Active__.  Enables or disables this notifier.
-Default value is disabled.
-Check this option to enable the notifier.
+__Rescan script directory__.  Checkbox requesting that the list of _Notifiers_
+(see below) be re-built by scanning the plugin's `bin/` folder for
+executable scripts.
+Default is true (to cause the _Notifiers_ list to built on first execution),
+but the value is set false after a scan is completed.
+
+__Trigger paths__.  A collection of potential Signal K notification paths 
+which are of interest to the plugin.
+Default is the empty string.
+Enter here a list of whitespace separated (newline works best) Signal K paths,
+without the 'notifications.' prefix.
+For example, if notifications are being raised in the system when the level of
+waste in the black water tank exceeds some threshold, then entering a string
+of the form "tanks.wasteWater.0.currentLevel" will cause the plugin to look
+out for notifications on this data point.
+ 
+__Notifiers__.  A list of notifier scripts and their options.
+Default is the list of all notifier scripts in the `bin/` folder in the
+plugin's installation directory.
+Entries in the list can be deleted and the list can be re-built (by re-scanning
+the `bin/` folder) using the _Rescan script directory_ option described above.
+Each notifier in the list can be configured through the following options.
 
 __Name__.  The name of the notifier (actually the filename of the notifier
 script in the plugin's `bin/` directory).
@@ -112,16 +145,19 @@ notifier script when run with no arguments).
 This option cannot be changed and should explain what values the notifier
 script will accept for the _Arguments_ option (see below).
 
-__Triggered by__.  The types of notification events which should cause
+__Triggered states__.  The types of notification events which should cause
 execution of the notifier script.
-The default value triggers an alert on any of _alert_, _alarm_ and _emergency_.
+The default value is to not trigger at all.
+Check the notification states which should cause the notifier script to
+execute when a notification appears on one of the _Trigger paths_.
 Use the dropdown list to select the required triggers.
 
 __Arguments__.  A comma or space separated list of values which should be
 passed to the notifier script as arguments.
+The default value is no arguments.
 The meaning of these values is script dependent (see _Description_ above),
 but for scripts which implement some kind of communication these will likely
-indicate the recipient of the notification.
+indicate the recipient(s) of the notification.
 For example, in the case of the `SMS` notifier script included in the plugin
 distribution this option should include a list of the cellphone numbers
 to which notification texts should be sent.

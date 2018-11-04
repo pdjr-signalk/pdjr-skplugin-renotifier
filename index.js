@@ -33,6 +33,16 @@ module.exports = function(app) {
 		return({	
 			type: "object",
 			properties: {
+				scan: {
+					title: "Scan disk for notifier scripts",
+					type: "boolean",
+					default: true
+				},
+				paths: {
+					title: "Trigger paths",
+					type: "string",
+					default: ""
+				},
 				notifiers: {
 					title: "Notifiers",
 					type: "array",
@@ -40,11 +50,6 @@ module.exports = function(app) {
 					items: {
 						type: "object",
 						properties: {
-							active: {
-								title: "Active",
-								type: "boolean",
-								default: false
-							},
 							name: {
 								title: "Name",
 								type: "string",
@@ -55,11 +60,14 @@ module.exports = function(app) {
 								type: "string",
 								default: ""
 							},
-							triggers: {
-								title: "Triggered by",
-								type: "string",
-								default: "alert",
-								enum: [ "normal", "alert", "alarm", "emergency" ]
+							triggerstates: {
+								title: "Trigger states",
+								type: "array",
+								items: {
+									type: "string",
+									enum: ["normal","alert","alarm","emergency"]
+								},
+								uniqueItems: true
 							},
 							arguments: {
 								title: "Arguments",
@@ -75,6 +83,9 @@ module.exports = function(app) {
 	}
  
 	plugin.uiSchema = {
+		paths: {
+			"ui:widget": "textarea"
+		},
 		notifiers: {
 			"ui:options": {
 				addable: false,
@@ -83,6 +94,14 @@ module.exports = function(app) {
 			items: {
 				name: {
 					"ui:disabled": true
+				},
+				triggerstates: {
+					"ui:widget": {
+						component: "checkboxes",
+						options: {
+							inline: true
+						}
+					}
 				}
 			}
 		}
@@ -90,55 +109,41 @@ module.exports = function(app) {
 
 	plugin.start = function(options) {
 
-		try {
-			var updatedOptions = updateOptions(options);
-			if (updatedOptions !== undefined) {
+		if (options.scan) {
+			try {
+				var updatednotifiers = loadNotifierOptionsFromDisk(options.notifiers);
 				try {
-					options = updatedOptions;
+					options.notifiers = updatednotifiers;
+					options.scan = false;
 					app.savePluginOptions(options);
 					logN("notifiers changed on disk (" + options.notifiers.map(v => v['name']).join(',') + ")");
 				} catch(e) {
 					logE("cannot save options");
 					return;
 				}
+			} catch(e) {
+				logE(e);
+				return;
 			}
-		} catch(e) {
-			logE(e);
-			return;
 		}
-		logN("Notifying by " + options.notifiers.filter(v => v['active']).map(v => v['name']).join(','));
 
-/*
-		if (fs.existsSync(RRDPATHNAME)) {
+		var activeNotifierNames = options.notifiers.filter(v => ((v['triggerstates'].length > 0) && (v['triggerpaths'] != "") && (v['arguments'] != ""))).map(v => v['name']);
 
-			var streams = options.sensors.map(v => app.streambundle.getSelfBus(v['path']));
-
-			logN("connected to " + streams.length + " sensor streams");
-
-			unsubscribes.push(bacon.zipAsArray(streams).debounceImmediate(1000 * UPDATE_INTERVAL).onValue(function(v) {
-				var now = Math.floor(Date.now() / 60000);
-
-				updateDatabase(
-					RRDTOOL,
-					RRDPATHNAME,
-					v.map(a => makeIdFromPath(a['path'])),
-					v.map(a => (Math.round(a['value'] * 100))),
-					options.consolereporting?app.setProviderStatus:null,
-					logW
-				);
-
-				if (GRAPHDIR.length != 0) {
-					[ 'day','week','month','year' ].filter((v,i) => ((now % GRAPH_INTERVALS[i]) == 0)).forEach(
-						period => createGraph(RRDPATHNAME, GRAPHDIR, options.sensors, period, null, logW)
-					);
-				}
-			}));
+		if (activeNotifierNames.length == 0) {
+			logN("There are no configured notifier scripts");
+			return;
 		} else {
-			logE("database missing");
-			return;
-		}
-*/
+			logN("Notifying by " + activeNotifierNames.join(','));
 
+			try {
+				var stream = app.streambundle.getSelfBus("notifications.tanks.wasteWater.0.currentLevel");
+				unsubscribes.push(stream.onValue(function(v) {
+					logN("Notification " + JSON.stringify(v));
+				}));
+			} catch(e) {
+				logE("Failed " + e);
+			}
+		}
 	}
 
 	plugin.stop = function() {
@@ -146,35 +151,33 @@ module.exports = function(app) {
 		unsubscribes = [];
 	}
 
-	function updateOptions(options) {
-		var changed = false;
+	function loadNotifierOptionsFromDisk(notifieroptions) {
+		var retval = notifieroptions;
 
 		try {
-			var entries = fs.readdirSync(NOTIFIER_DIRECTORY);
-			// Delete dead ones...
-			var n = options.notifiers.length;
-			options.notifiers = options.notifiers.filter(v => entries.includes(v['name']));
-			changed = (options.notifiers.length != n);
-			// Add new ones...
-			entries.forEach(function(entry) {
-				if (!options.notifiers.map(v => v['name']).includes(entry)) {
-					var description = "";
-					try { description = execSync(NOTIFIER_DIRECTORY + entry).toString().trim(); } catch(err) {  }
-					options.notifiers.push({
-						"active": false,
-						"name": entry,
-						"description": description,
-						"triggers": "alert",
-						"arguments": ""
-					});
-					changed = true;
+			retval = fs.readdirSync(NOTIFIER_DIRECTORY).map(function(entry) {
+				var description = "";
+				var triggerstates = [];
+				var arguments = "";
+
+				try { description = execSync(NOTIFIER_DIRECTORY + entry).toString().trim(); } catch(err) {  }
+				if (notifieroptions.map(v => v['name']).includes(entry)) {
+					triggerstates = notifieroptions.reduce((a,v) => ((a !== undefined)?a:((v['name'] == entry)?v['triggerstates']:a)),undefined);
+					arguments = notifieroptions.reduce((a,v) => ((a !== undefined)?a:((v['name'] == entry)?v['arguments']:a)),undefined);
 				}
+				
+				return({
+					"name": entry,
+					"description": description,
+					"triggerstates": triggerstates,
+					"arguments": arguments
+				});
 			});
 		} catch(e) {
 			logE("error reading script directory");
 			throw("error reading script directory");
 		}
-		return(changed?options:undefined);
+		return(retval);
 	}
 
 	function log(prefix, terse, verbose) {
