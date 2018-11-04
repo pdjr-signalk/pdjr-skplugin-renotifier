@@ -149,6 +149,7 @@ The `SMS` script installed with the plugin is listed below.
 #!/bin/bash
 # Send Signal K notifications by SMS
 
+# Issue some text for use in the plugin configuration 'Description' option
 if [ "$#" -eq 0 ]; then
 	echo "Send Signal K notifications by SMS (arguments must be phone numbers)"
 	exit 0
