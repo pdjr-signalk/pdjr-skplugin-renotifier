@@ -6,7 +6,8 @@ if [ "$#" -eq 0 ]; then
 	exit 0
 fi
  
-GAMMU="/usr/bin/gammu"
+GAMMU=`which gammu`
+echo $GAMMU
 
 while [ "${1}" != "" ]; do
 #	COMMAND="$GAMMU sendsms TEXT ${1}"
