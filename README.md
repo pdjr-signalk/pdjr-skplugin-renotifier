@@ -145,7 +145,7 @@ the return value as the contents of the _Description_ configuration option.
 
 The `SMS` script installed with the plugin is listed below.
 
-`
+```
 #!/bin/bash
 # Send Signal K notifications by SMS
 
@@ -161,7 +161,7 @@ while [ "${1}" != "" ]; do
 #	eval ${COMMAND} < &0
 #	shift
 done
-`
+```
 
 ## Notifications, warnings and errors
 
