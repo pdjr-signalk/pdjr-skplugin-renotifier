@@ -187,19 +187,23 @@ The `SMS` script installed with the plugin is listed below.
 #!/bin/bash
 # Send Signal K notifications by SMS
 
-# Issue some text for use in the plugin configuration 'Description' option
-if [ "$#" -eq 0 ]; then
-	echo "Send Signal K notifications by SMS (arguments must be phone numbers)"
-	exit 0
-fi
- 
-GAMMU="/usr/bin/gammu"
+COMMAND=gammu
 
-while [ "${1}" != "" ]; do
-#	COMMAND="$GAMMU sendsms TEXT ${1}"
-#	eval ${COMMAND} < &0
-#	shift
-done
+if [ "$#" -eq 0 ]; then
+        echo "Send Signal K notifications by SMS (arguments must be phone numbers)"
+        exit 0
+fi
+
+if hash ${COMMAND} 2>/dev/null ; then
+        while [ "${1}" != "" ]; do
+                cat - | ${COMMAND} sendsms TEXT ${1}
+                shift
+        done
+else
+        >&2 echo "required program '${COMMAND}' is not available"
+        exit 1
+fi
+
 ```
 
 ## Notifications, warnings and errors
