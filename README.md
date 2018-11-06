@@ -1,19 +1,16 @@
 # signalk-renotifier
 
 [Signal K Node server](https://github.com/SignalK/signalk-server-node)
-plugin which executes a script in response to system notifications.
-The plugin installation discusses examples of using the plugin to distribute
-SMS and email alerts.
+plugin which executes external scripts in response to system notifications.
 
-Signal K notifications are processed by __signalk-renotifier__ and trigger
-calls to one or more external scripts which implement some desired action.
-The plugin ships with simple scripts for sending SMS and email messages, but
-the actual external action is not constrained and the user can supply their
-own additional scripts to implement a required function. 
+The plugin was developed to provide a remote notification service exploiting
+SMS and Email and although the function of the plugin's external scripts is not
+constrained this documentation focusses on the original design focus, discussing
+examples of using the plugin to distribute SMS and email alerts.
 
 The _System requirements_ section below discusses some of the issues around
 supporting SMS and Email communications and summarises the way in which these
-have been addressed in plugin development environment.
+issues have been addressed in the author's plugin development environment.
 
 The remaining part of this document focusses almost exclusively on the
 provison of SMS based notification using a cellular modem connected directly
@@ -21,17 +18,13 @@ to the Signal K Node server host.
 
 ## Principle of operation
 
-__signalk-renotifier__ is configured with a collection of Signal K
-notification paths called _trigger paths_ and a collection of notification
-scripts called _notifiers_.
-
-When the Signal K Node server receives a notification update relating to one
-of the trigger paths the plugin presents a notification opportunity to each
-notifier.
-Each notifier is configured with a set of _trigger states_ to which it should
-respond and if the state of the received notification update matches one of
-the configured trigger states then the notifier's external script  will be
-invoked.
+__signalk-renotifier__ processes
+[Signal K notifications](http://signalk.org/specification/1.0.0/doc/notifications.html),
+responding to just those notifications identified in the plugin configuration
+and herein called _trigger paths_.
+When a notification is received on a trigger path, the plugin presents a notification
+opportunity to one or more configured _notifiers_ which determines based upon its
+configuration whether or not to execute its associated external script.
  
 ## System requirements
 
@@ -46,7 +39,7 @@ the requirements of each of these are discussed below.
 ### SMS - send notifications by SMS text
 
 To be able to send SMS messages a computer must have access to a cellular
-modem or a mobile phone that supports remote control and a software stack that
+modem (or a mobile phone that supports remote control) and a software stack that
 can make the hardware operate in a meaningful way.
 
 Hardware.
@@ -60,14 +53,14 @@ Software.
 [Gammu](https://wammu.eu/gammu/)
 is a software suite for operating most types of cellphone hardware and is
 part of most Linux distributions.
-_Gammu_ has out-of-the-box support for the Huawei E353 (but not for all
-USB cellular modems...).
+_Gammu_ has out-of-the-box support for the Huawei E353 and many other (but
+not _every_) USB cellular modems....
 
 ### Email - send notifications by electronic mail
 
-For the plugin to be able to send email the host system must have a working
-mail transfer agent (MTA) and a supporting mechanism for permanent or on-demand
-connection to the Internet.
+For the plugin to be able to send email in a timely fashion the host system must
+have a working mail transfer agent (MTA) and a supporting mechanism for permanent
+or on-demand connection to the Internet.
 It is relatively straightforwards, but non-trivial to implement an email
 infrastructure for a boat that can sensibly support __signalk-renotifier__.
 My solution (summarised below) is home-spun, but there are out-of-box
@@ -80,14 +73,20 @@ provide on-demand Internet connectivity over WiFi, automatically falling back
 onto the cellular network when WiFi is not available.
 This means that any demand from a device on the ship's LAN for access to the
 Internet (including for the purpose of sending email) is automatically
-satisfied.
+satisfied if the vessel is in range of an accessible wireless or 4G network.
 
 Software.
 [Sendmail](https://en.wikipedia.org/wiki/Sendmail)
-is used as the Signal K Node server host's mail transfer agent (MTA), routing
+is used as my Signal K Node server host's mail transfer agent (MTA), routing
 outgoing email directly to Google's Gmail SMTP servers.
 _Sendmail_ is part of most Linux distributions and its configuration and use
 are comprehensively documented.
+
+## From this point on...
+
+The remainder of this document focusses exclusively on the use of
+__signalk_renotifier__ as a platform for implementing an SMS notification
+service.
 
 ## Installation
 
