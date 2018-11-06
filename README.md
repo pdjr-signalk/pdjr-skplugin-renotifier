@@ -168,7 +168,21 @@ to which notification texts should be sent.
 
 Notifier scripts are shell scripts or executables located in the `bin/`
 folder under the plugin installation directory.
-Scripts must be executable by the owner of the executing Signale K Node server.
+Scripts must be executable by the owner of the running Signal K Node server and
+should provide the following interface.
+
+1. The script will only perform its defined function when one or more arguments
+are offered on the command line.
+
+2. When called with no arguments the script must return a string which
+describes the function of the script and offers advice on what argument values
+are acceptable.
+The exit value of the script must be 0.
+
+3. If the script cannot attempt to perform its function for whatever reason
+then the exit value must be 1 and the reason for failure issued on stdout.
+
+4. 
 
 __signalk-renotifier__ executes a script by passing the text of the
 notification as the script's standard input and the contents of the
@@ -199,6 +213,7 @@ if hash ${COMMAND} 2>/dev/null ; then
                 cat - | ${COMMAND} sendsms TEXT ${1}
                 shift
         done
+	exit 0
 else
         >&2 echo "required program '${COMMAND}' is not available"
         exit 1
