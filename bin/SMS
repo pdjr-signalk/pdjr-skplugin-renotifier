@@ -1,17 +1,21 @@
 #!/bin/bash
 # Send Signal K notifications by SMS
 
-if [ "$#" -eq 0 ]; then
+COMMAND=gammu
+
+if [ $# -eq 0 ]; then
 	echo "Send Signal K notifications by SMS (arguments must be phone numbers)"
 	exit 0
 fi
- 
-GAMMU=`which gammu`
-echo $GAMMU
 
-while [ "${1}" != "" ]; do
-#	COMMAND="$GAMMU sendsms TEXT ${1}"
-#	eval ${COMMAND} < &0
-#	shift
-done
+if hash ${COMMAND} 2>/dev/null ; then
+	while [ "${1}" != "" ]; do
+		cat - | ${COMMAND} sendsms TEXT ${1}
+		shift
+	done
+	exit 0
+else
+	>&2 echo "required program '${COMMAND}' is not available"
+	exit 1
+fi
 
