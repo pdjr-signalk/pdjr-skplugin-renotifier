@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-const execSync = require('child_process').execSync;
-const exec = require('child_process').exec;
+const { spawn } = require('child_process');
+const { execSync } = require('child_process');
 const fs = require('fs');
 const bacon = require('baconjs');
 
@@ -109,46 +109,72 @@ module.exports = function(app) {
 
 	plugin.start = function(options) {
 
+		// If the scan option is true, then we need to rebuild the list of
+		// notifier scripts by loading entries from the plugin's bin/ folder
+		// and saving them to the plugin options.
+		//
 		if (options.scan) {
 			try {
 				var updatednotifiers = loadNotifierOptionsFromDisk(options.notifiers);
+				options.notifiers = updatednotifiers;
+				options.scan = false;
 				try {
-					options.notifiers = updatednotifiers;
-					options.scan = false;
 					app.savePluginOptions(options);
-					logN("notifiers changed on disk (" + options.notifiers.map(v => v['name']).join(',') + ")");
+					logN("plugin notifier list updated from disk");
 				} catch(e) {
-					logE("cannot save options");
+					logE("cannot save configuration options: " + e);
 					return;
 				}
 			} catch(e) {
-				logE(e);
+				logE("cannot scan script directory: " + e);
 				return;
 			}
 		}
 
-		var activeNotifierNames = options.notifiers.filter(v => ((v['triggerstates'].length > 0) && (v['triggerpaths'] != "") && (v['arguments'] != ""))).map(v => v['name']);
 
-		if (activeNotifierNames.length == 0) {
-			logN("There are no configured notifier scripts");
-			return;
-		} else {
-			logN("Notifying by " + activeNotifierNames.join(','));
+		// Start production by subscribing to the Signal K paths that are
+		// identifed in the configuration options.  Each time a notification
+		// appears on one of these streams, then offer it for action to each
+		// of the active notifier scripts.
+		//
+		try {
+			var streams = (options.paths.match(/\S+/g).map(p => app.streambundle.getSelfBus("notifications." + p))) || [];
+			if (streams.length > 0) {
+				logN("Connected to " + streams.length + " notification streams");
+				unsubscribes.push(bacon.mergeAll(streams).onValue(function(v) {
+					options.notifiers.filter(n => (n['triggerstates'].includes(v['value']['state']) && (n['arguments'] != ""))).forEach(function(notifier) {
+						try {
+							var command = __dirname + "/bin/" + notifier['name'];
+							var args = sanitizeArguments(notifier['arguments']);
+							var exitcode = 0, stdout = "", stderr = "";
+							var child = spawn(command, args);
 
-			try {
-				var stream = app.streambundle.getSelfBus("notifications.tanks.wasteWater.0.currentLevel");
-				unsubscribes.push(stream.onValue(function(v) {
-					logN("Notification " + JSON.stringify(v));
+							child.stdout.on('data', (data) => { stdout+=data; });
+							child.stderr.on('data', (data) => { stderr+=data; });
+							child.stderr.on('close', (code) => { exitcode = code; logW("Done " + code); });
+							child.write("My test message");
+						} catch(err) {
+							logW("error executing " + notifier['name'] + ": " + err);
+						}
+					});
 				}));
-			} catch(e) {
-				logE("Failed " + e);
 			}
+		} catch(e) {
+			logE("Failed " + e);
+			return;
 		}
 	}
 
 	plugin.stop = function() {
 		unsubscribes.forEach(f => f());
 		unsubscribes = [];
+	}
+
+	/**
+	 * Convert args into an array of strings
+	 */
+	function sanitizeArguments(args) {
+		return((args == undefined)?args.split(/\S+/):[]);
 	}
 
 	function loadNotifierOptionsFromDisk(notifieroptions) {
@@ -174,7 +200,6 @@ module.exports = function(app) {
 				});
 			});
 		} catch(e) {
-			logE("error reading script directory");
 			throw("error reading script directory");
 		}
 		return(retval);
