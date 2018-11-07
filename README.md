@@ -133,19 +133,37 @@ _script_ [_arg_...]
 
 Where _script_ is the name of the script file and _arg_ is an argument of a type
 dependent upon script function (see above).
-For example the command:
+
+During plugin initialisation __signalk_renotifier__ executes each script with
+no arguments in order to obtain some text that will be used in the script's
+configuration description option.
+So, when _script_ is executed with no arguments it must return a string whic
+describes the function of the script and offers advice on what types of _arg_
+values are acceptable.
+In this case the exit value of _script_ must always be 0.
+
+The `SMS` script for example:
+```
+$> SMS
+Send notifications as SMS text messages (arguments must be telephone numbers)
+$>
+
+The `SMS` script, for example, requires its arguments to be telephone numbers and
+so the command:
 ``
 echo "Hello!" | SMS +447786119911
 ``
-will attempt to send a simple text message to the indicated phone number.
+will attempt to send a simple text message to the supplied phone number.
 
-__signalk_notifier__ will execute _script_ when a notification event occurs and
-pass a textual description the notification message via _script_'s standard input.
 
 Executing _script_ with no arguments must return a string which describes the
 function of the script and offers advice on what types of _arg_ values
 are acceptable.
 In this case the exit value of _script_ must always be 0.
+
+__signalk_notifier__ will execute a _script_ when a notification event occurs
+that matches _script_'s configuration criteria and will pass the text of the
+notification message via _script_'s standard input.
 
 When _script_ is executed with one or more _args_ it must operate in the
 following way.
