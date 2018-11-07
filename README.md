@@ -33,19 +33,17 @@ requirements on the host server's software, hardware and operating environment.
 The plugin ships with some example notifier scripts for sending Email and
 SMS text messages.
 
-_
-Sending an SMS from a computer requires that the system has access to a
+_Sending an SMS from a computer requires that the system has access to a
 cellular modem (or a mobile phone that supports remote control) and a software
 stack that can make this hardware operate in a meaningful way.
 
-My hardware consists of a permananently attached Huawei E353 USB cellular
+_My hardware consists of a permananently attached Huawei E353 USB cellular
 modem (purchased on Ebay for a few Euros) connected to a (probably unnecessary)
 external antenna (purchased from a chandler for many tens of Euros).
 
-The software I use to access my cellular modem is
+_The software I use to access my cellular modem is
 [Gammu](https://wammu.eu/gammu/)
 which is part of most modern Linux distributions.
-_
 
 ## Installation
 
