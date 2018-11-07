@@ -76,8 +76,7 @@ Check this option to re-initialise the list of notifiers (any configuration of
 existing entries in _Notifiers_ will be retained).
 
 __Trigger paths__.
-Textbox listing the Signal K notification paths which should be monitored by
-the plugin.
+List of the Signal K notification paths which should be monitored by the plugin.
 Default is the empty string.
 Enter here a list of whitespace separated (newline works best) Signal K paths,
 without the 'notifications.' prefix.
@@ -86,37 +85,41 @@ waste in the black water tank exceeds some threshold, then entering a string
 of the form "tanks.wasteWater.0.currentLevel" will cause the plugin to look
 out for notifications on this data point.
  
-__Notifiers__.  A list of notifier scripts and their options.
+__Notifiers__.
+List of notifier (scripts) and their options.
 Default is the list of all notifier scripts in the `bin/` folder in the
 plugin's installation directory.
 Entries in the list can be deleted and the list can be re-built (by re-scanning
 the `bin/` folder) using the _Scan script directory_ option described above.
 Each notifier in the list can be configured through the following options.
 
-__Name__.  The name of the notifier (actually the filename of the notifier
-script in the plugin's `bin/` directory).
+__Name__.
+The name of the notifier (actually the filename of the notifier script in the
+plugin's `bin/` directory).
 This option cannot be changed.
 
-__Description__.  A short description of the notifier (as reported by the
-notifier script when run with no arguments).
+__Description__.
+A short description of the notifier (as reported by the notifier script when
+run with no arguments).
 This option cannot be changed and should explain what values the notifier
 script will accept for the _Arguments_ option (see below).
 
-__Triggered states__.  The types of notification events which should cause
-execution of the notifier script.
+__Trigger states__.
+The notification states which should cause execution of the notifier script.
 The default value is to not trigger at all.
 Check the notification states which should cause the notifier script to
 execute when a notification appears on one of the _Trigger paths_.
-Use the dropdown list to select the required triggers.
 
-__Arguments__.  A comma or space separated list of values which should be
-passed to the notifier script as arguments.
-The default value is no arguments.
+__Arguments__.
+A comma or space separated list of values which should be passed to the notifier
+script as arguments.
+The default value is no arguments and the system will accept a maximum of
+eight arguments.
 The meaning of these values is script dependent (see _Description_ above),
 but for scripts which implement some kind of communication these will likely
 indicate the recipient(s) of the notification.
 For example, in the case of the `SMS` notifier script included in the plugin
-distribution this option should include a list of the cellphone numbers
+distribution this option should contain a list of the cellphone numbers
 to which notification texts should be sent.
 
 ### Notifier scripts
@@ -126,54 +129,52 @@ folder under the plugin installation directory.
 Scripts must be executable by the owner of the running Signal K Node server and
 should provide the following interface.
 
-1. The script will only perform its defined function when one or more arguments
-are offered on the command line.
+_script_ [_arg_...]
 
-2. When called with no arguments the script must return a string which
-describes the function of the script and offers advice on what argument values
+Where _script_ is the name of the script file and _arg_ is an argument of a type
+dependent upon script function (see above).
+
+__signalk_notifier__ will execute _script_ when a notification event occurs and
+pass a textual description the notification message via _script_'s standard input.
+
+Executing _script_ with no arguments must return a string which describes the
+function of the script and offers advice on what types of _arg_ values
 are acceptable.
-The exit value of the script must be 0.
+In this case the exit value of _script_ must always be 0.
 
-3. If the script cannot attempt to perform its function for whatever reason
-then the exit value must be 1 and the reason for failure issued on stdout.
+When _script_ is executed with one or more _args_ it must operate in the
+following way.
 
-4. 
+1. If _script_ cannot attempt to perform its function for whatever reason
+then it must emit a short explanatory reason for the problem on stderr and
+terminate with exit value 1.
+A typical reasons might be "required hardware not available", "program 'foo'
+is required but cannot be found" or "no message on standard input".
 
-__signalk-renotifier__ executes a script by passing the text of the
-notification as the script's standard input and the contents of the
-configuration _Arguments_ field as the script argument(s).
-For a script designed to send messages, the _Arguments_ field will typically
-contain a list of message addressees in whatever format suits the mode
-of communication: telephone numbers for SMS, email addresses for email,
-and so on.
+2. _script_ should then iterate over its _args_, attempting to perform whatever
+action is intended.
+The recommended algorithm for managing this process and ensuring a meaningful
+error code value for _script_ is shown below.
 
-The plugin executes each notifier script once with no arguments and uses
-the return value as the contents of the _Description_ configuration option.
+```
+exitcode = 0
+for (i = 0; i < args.length; i++) {
+	perform operation
+	exitcode += (operation failed)?(2 ^ iteration):0
+}
+return (exitcode + 256)
+```
+
+3. In the case of failures which occur whilst iterating over _args_, _script_ should
+issue a message on stderr which reports the reason(s) for failure. 
+
+4. As far as possible _script_ should limit unnecessary resource consumption.
+The SMS script, for example, abandons attempts to send a text message as soon as
+_gammu_ reports the cellular network is unavailable.
 
 The `SMS` script installed with the plugin is listed below.
 
 ```
-#!/bin/bash
-# Send Signal K notifications by SMS
-
-COMMAND=gammu
-
-if [ "$#" -eq 0 ]; then
-        echo "Send Signal K notifications by SMS (arguments must be phone numbers)"
-        exit 0
-fi
-
-if hash ${COMMAND} 2>/dev/null ; then
-        while [ "${1}" != "" ]; do
-                cat - | ${COMMAND} sendsms TEXT ${1}
-                shift
-        done
-	exit 0
-else
-        >&2 echo "required program '${COMMAND}' is not available"
-        exit 1
-fi
-
 ```
 
 ## Notifications, warnings and errors
