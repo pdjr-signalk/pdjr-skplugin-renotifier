@@ -133,6 +133,11 @@ _script_ [_arg_...]
 
 Where _script_ is the name of the script file and _arg_ is an argument of a type
 dependent upon script function (see above).
+For example the command:
+``
+echo "Hello!" | SMS +447786119911
+``
+will attempt to send a simple text message to the indicated phone number.
 
 __signalk_notifier__ will execute _script_ when a notification event occurs and
 pass a textual description the notification message via _script_'s standard input.
