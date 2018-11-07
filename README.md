@@ -1,107 +1,66 @@
 # signalk-renotifier
 
 [Signal K Node server](https://github.com/SignalK/signalk-server-node)
-plugin which executes external scripts in response to system notifications.
+plugin which executes arbitrary external scripts in response to system
+notifications.
 
-The plugin was developed to provide a remote notification service exploiting
-SMS and Email and although the function of the plugin's external scripts is not
-constrained this documentation focusses on the original design focus, discussing
-examples of using the plugin to distribute SMS and email alerts.
+The plugin was developed to provide a remote notification service and although
+this functional role determines the syntax of external script invocation it
+does not place arbitrary constraints on what a script can do.
 
-The _System requirements_ section below discusses some of the issues around
-supporting SMS and Email communications and summarises the way in which these
-issues have been addressed in the author's plugin development environment.
-
-The remaining part of this document focusses almost exclusively on the
-provison of SMS based notification using a cellular modem connected directly
-to the Signal K Node server host.
-
-## Principle of operation
+Where appropriate this documentation takes as a case study my use of
+__signalk-renotifier__ to implement a simple SMS-based notification service.
+ 
+### Principle of operation
 
 __signalk-renotifier__ processes
 [Signal K notifications](http://signalk.org/specification/1.0.0/doc/notifications.html),
 responding to just those notifications identified in the plugin configuration
-and herein called _trigger paths_.
-When a notification is received on a trigger path, the plugin presents a notification
-opportunity to one or more configured _notifiers_ which determines based upon its
-configuration whether or not to execute its associated external script.
+and hereafter called _trigger paths_.
+When a notification is received on a trigger path, the plugin presents a
+notification opportunity to one or more configured _notifiers_ each of which
+determines, based upon its configuration, whether or not to execute its
+associated, external, _notification script_.
  
 ## System requirements
 
 __signalk-renotifier__ has no special system requirements that must be met
 prior to installation.
 
-System requirements are contingent upon the specific needs of each of the
-external _notifier scripts_ that the plugin executes.
-The plugin ships with two example scripts for sending SMS texts and emails and
-the requirements of each of these are discussed below.
+Of course, for the plugin to actually _do_ anything it requires one or more
+notification scripts and these scripts may well place quite demanding
+requirements on the host server's software, hardware and operating environment.
+The plugin ships with some example notifier scripts for sending Email and
+SMS text messages.
 
-### SMS - send notifications by SMS text
+```
+Sending an SMS from a computer requires that the system has access to a
+cellular modem (or a mobile phone that supports remote control) and a software
+stack that can make this hardware operate in a meaningful way.
 
-To be able to send SMS messages a computer must have access to a cellular
-modem (or a mobile phone that supports remote control) and a software stack that
-can make the hardware operate in a meaningful way.
+My hardware consists of a permananently attached Huawei E353 USB cellular
+modem (purchased on Ebay for a few Euros) connected to a (probably unnecessary)
+external antenna (purchased from a chandler for many tens of Euros).
 
-Hardware.
-Cellular modem USB dongles are inexpensive and moderately well supported by
-the popular Linux distributions: my Signal K Node server has a permananently
-attached Huawei E353 cellular modem (purchased on Ebay for a few Euros)
-connected to a (probably unnecessary) external antenna (purchased from a
-chandler for many tens of Euros).
-
-Software.
+The software I use to access my cellular modem is
 [Gammu](https://wammu.eu/gammu/)
-is a software suite for operating most types of cellphone hardware and is
-part of most Linux distributions.
-_Gammu_ has out-of-the-box support for the Huawei E353 and many other (but
-not _every_) USB cellular modems....
-
-### Email - send notifications by electronic mail
-
-For the plugin to be able to send email in a timely fashion the host system must
-have a working mail transfer agent (MTA) and a supporting mechanism for permanent
-or on-demand connection to the Internet.
-It is relatively straightforwards, but non-trivial to implement an email
-infrastructure for a boat that can sensibly support __signalk-renotifier__.
-My solution (summarised below) is home-spun, but there are out-of-box
-alternatives built upon a range of communication technologies available from
-commercial suppliers.
-
-Hardware and infastructure.
-My ship-wide ethernet includes an inexpensive 4G wireless router configured to
-provide on-demand Internet connectivity over WiFi, automatically falling back
-onto the cellular network when WiFi is not available.
-This means that any demand from a device on the ship's LAN for access to the
-Internet (including for the purpose of sending email) is automatically
-satisfied if the vessel is in range of an accessible wireless or 4G network.
-
-Software.
-[Sendmail](https://en.wikipedia.org/wiki/Sendmail)
-is used as my Signal K Node server host's mail transfer agent (MTA), routing
-outgoing email directly to Google's Gmail SMTP servers.
-_Sendmail_ is part of most Linux distributions and its configuration and use
-are comprehensively documented.
-
-## From this point on...
-
-The remainder of this document focusses exclusively on the use of
-__signalk_renotifier__ as a platform for implementing an SMS notification
-service.
+which is part of most modern Linux distributions.
+```
 
 ## Installation
 
-1. If you don't have it already, install __gammu__ on your Signal K Node
-server host.
-Use your system's package manager, or download and install a suitable version
-from the
-[gammu download page](https://wammu.eu/download/gammu/).
-
-2. Download and install __signalk-renotifier__ using the _Appstore_ link
+Download and install __signalk-renotifier__ using the _Appstore_ link
 in your Signal K server console.
 The plugin can also be downloaded from the 
 [project homepage](https://github.com/preeve9534/signalk-renotifier)
 and installed using
 [these instructions](https://github.com/SignalK/signalk-server-node/blob/master/SERVERPLUGINS.md).
+```
+For cellular modem support, install __gammu__ on your Signal K Node server
+host using your system's package manager, or download and install a suitable
+version from the
+[gammu download page](https://wammu.eu/download/gammu/).
+```
 
 ## Usage
 
