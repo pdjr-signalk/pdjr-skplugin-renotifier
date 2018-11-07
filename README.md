@@ -58,7 +58,7 @@ _For cellular modem support, install _gammu_ on your Signal K Node server
 host using your system's package manager, or download and install a suitable
 version from the
 [gammu download page](https://wammu.eu/download/gammu/)._
-`
+
 ## Usage
 
 ### Activating the plugin
@@ -71,8 +71,7 @@ the following configuration options.
 __Scan script directory__.
 Checkbox requesting that the list of _Notifiers_ (see below) be re-built by
 scanning the plugin's `bin/` folder for executable scripts.
-Default is true (to cause the _Notifiers_ list to built on first
-).
+Default is true (to cause the _Notifiers_ list to built on first execution).
 Check this option to re-initialise the list of notifiers (any configuration of
 existing entries in _Notifiers_ will be retained).
 
