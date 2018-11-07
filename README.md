@@ -8,7 +8,7 @@ The plugin was developed to provide a remote notification service and although
 this functional role determines the syntax of external script invocation it
 does not place arbitrary constraints on what a script can do.
 
-Where appropriate this documentation takes as a case study my use of
+Where appropriate this documentation takes as a case study the author's use of
 __signalk-renotifier__ to implement a simple SMS-based notification service.
  
 ### Principle of operation
@@ -53,13 +53,12 @@ The plugin can also be downloaded from the
 [project homepage](https://github.com/preeve9534/signalk-renotifier)
 and installed using
 [these instructions](https://github.com/SignalK/signalk-server-node/blob/master/SERVERPLUGINS.md).
-```
-For cellular modem support, install __gammu__ on your Signal K Node server
+
+_For cellular modem support, install _gammu_ on your Signal K Node server
 host using your system's package manager, or download and install a suitable
 version from the
-[gammu download page](https://wammu.eu/download/gammu/).
-```
-
+[gammu download page](https://wammu.eu/download/gammu/)._
+`
 ## Usage
 
 ### Activating the plugin
@@ -69,16 +68,17 @@ version from the
 The plugin configuration page at _Server->Plugin config->Renotifier_ offers
 the following configuration options.
 
-__Scan script directory__.  Checkbox requesting that the list of _Notifiers_
-(see below) be re-built by scanning the plugin's `bin/` folder for
-executable scripts.
-Default is true (to cause the _Notifiers_ list to built on first configuration),
-but is then set false.
+__Scan script directory__.
+Checkbox requesting that the list of _Notifiers_ (see below) be re-built by
+scanning the plugin's `bin/` folder for executable scripts.
+Default is true (to cause the _Notifiers_ list to built on first
+).
 Check this option to re-initialise the list of notifiers (any configuration of
 existing entries in _Notifiers_ will be retained).
 
-__Trigger paths__.  A collection of potential Signal K notification paths 
-which are of interest to the plugin.
+__Trigger paths__.
+Textbox listing the Signal K notification paths which should be monitored by
+the plugin.
 Default is the empty string.
 Enter here a list of whitespace separated (newline works best) Signal K paths,
 without the 'notifications.' prefix.
