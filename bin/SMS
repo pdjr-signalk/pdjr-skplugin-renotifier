@@ -9,8 +9,10 @@ if [ $# -eq 0 ]; then
 fi
 
 if hash ${COMMAND} 2>/dev/null ; then
+	MESSAGE=`cat`
 	while [ "${1}" != "" ]; do
-		cat - | ${COMMAND} sendsms TEXT ${1}
+		#echo "`date` ${MESSAGE} ${COMMAND} sendsms TEXT ${1}" >> /root/.signalk/node_modules/signalk-renotifier/sms.log
+		echo "${MESSAGE}" | ${COMMAND} sendsms TEXT ${1}
 		shift
 	done
 	exit 0

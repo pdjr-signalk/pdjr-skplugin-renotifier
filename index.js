@@ -143,19 +143,15 @@ module.exports = function(app) {
 				logN("Connected to " + streams.length + " notification streams");
 				unsubscribes.push(bacon.mergeAll(streams).onValue(function(v) {
 					options.notifiers.filter(n => (n['triggerstates'].includes(v['value']['state']) && (n['arguments'] != ""))).forEach(function(notifier) {
-						try {
-							var command = __dirname + "/bin/" + notifier['name'];
-							var args = sanitizeArguments(notifier['arguments']);
-							var exitcode = 0, stdout = "", stderr = "";
-							var child = spawn(command, args);
-
-							child.stdout.on('data', (data) => { stdout+=data; });
-							child.stderr.on('data', (data) => { stderr+=data; });
-							child.stderr.on('close', (code) => { exitcode = code; logW("Done " + code); });
-							child.write("My test message");
-						} catch(err) {
-							logW("error executing " + notifier['name'] + ": " + err);
-						}
+						var command = __dirname + "/bin/" + notifier['name'];
+						var args = sanitizeArguments(notifier['arguments']);
+						var exitcode = 0, stdout = "", stderr = "";
+						var child = spawn(command, args, { shell: true, env: process.env });
+						child.stdout.on('data', (data) => { stdout+=data; });
+						child.stderr.on('data', (data) => { stderr+=data; });
+						child.stdin.write(v['value']['message']); child.stdin.end();
+						child.on('close', (code) => { logE("Complete " + stdout + stderr); });
+						child.on('error', (code) => { logE("Failed" + stdout + stderr); });
 					});
 				}));
 			}
@@ -174,7 +170,7 @@ module.exports = function(app) {
 	 * Convert args into an array of strings
 	 */
 	function sanitizeArguments(args) {
-		return((args == undefined)?args.split(/\S+/):[]);
+		return((args !== undefined)?args.split(/[ ,]+/):[]);
 	}
 
 	function loadNotifierOptionsFromDisk(notifieroptions) {
