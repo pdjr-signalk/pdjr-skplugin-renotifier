@@ -129,24 +129,27 @@ folder under the plugin installation directory.
 Scripts must be executable by the owner of the running Signal K Node server and
 should provide the following interface.
 
-_script_ [_arg_...]
+_script_ [_arg_ ...]
 
 Where _script_ is the name of the script file and _arg_ is an argument of a type
 dependent upon script function (see above).
 
 During plugin initialisation __signalk_renotifier__ executes each script with
-no arguments in order to obtain some text that will be used in the script's
-configuration description option.
-So, when _script_ is executed with no arguments it must return a string whic
-describes the function of the script and offers advice on what types of _arg_
-values are acceptable.
+no arguments in order to obtain some descriptive text that can be used in the plugin
+configuration page: it is helpful if this text offers some advice on what types of
+_arg_ values are acceptable to _script_.
 In this case the exit value of _script_ must always be 0.
 
-The `SMS` script for example:
+The `SMS` script, for example, behaves in the following way:
 ```
 $> SMS
 Send notifications as SMS text messages (arguments must be telephone numbers)
 $>
+```
+Normally, execution of _script_ will happen when a notification event occurs
+that matches _script_'s configuration criteria and __signalk_notifier__ will pass
+the text of the notification message via _script_'s standard input and all
+configured arguments as a space separated _arg_ values.
 
 The `SMS` script, for example, requires its arguments to be telephone numbers and
 so the command:
@@ -154,16 +157,6 @@ so the command:
 echo "Hello!" | SMS +447786119911
 ``
 will attempt to send a simple text message to the supplied phone number.
-
-
-Executing _script_ with no arguments must return a string which describes the
-function of the script and offers advice on what types of _arg_ values
-are acceptable.
-In this case the exit value of _script_ must always be 0.
-
-__signalk_notifier__ will execute a _script_ when a notification event occurs
-that matches _script_'s configuration criteria and will pass the text of the
-notification message via _script_'s standard input.
 
 When _script_ is executed with one or more _args_ it must operate in the
 following way.
@@ -176,23 +169,22 @@ is required but cannot be found" or "no message on standard input".
 
 2. _script_ should then iterate over its _args_, attempting to perform whatever
 action is intended.
-The recommended algorithm for managing this process and ensuring a meaningful
-error code value for _script_ is shown below.
-
+A basic algorithm for managing this process and ensuring a meaningful error
+code value for _script_ is shown below.
 ```
 exitcode = 0
 for (i = 0; i < args.length; i++) {
-	perform operation
-	exitcode += (operation failed)?(2 ^ iteration):0
+	failed = perform operation
+	exitcode += (failed)?(2 ^ i):0
 }
 return (exitcode + 256)
 ```
 
 3. In the case of failures which occur whilst iterating over _args_, _script_ should
-issue a message on stderr which reports the reason(s) for failure. 
+issue a message on stderr which attempts to report the reason(s) for failure. 
 
 4. As far as possible _script_ should limit unnecessary resource consumption.
-The SMS script, for example, abandons attempts to send a text message as soon as
+The `SMS` script, for example, abandons attempts to send a text message as soon as
 _gammu_ reports the cellular network is unavailable.
 
 The `SMS` script installed with the plugin is listed below.
