@@ -11,8 +11,6 @@ does not place arbitrary constraints on what a script can do.
 Where appropriate this documentation takes as a case study the author's use of
 __signalk-renotifier__ to implement a simple SMS-based notification service.
 
-![Plugin configuration screen](readme/screenshot.png)
- 
 ### Principle of operation
 
 __signalk-renotifier__ processes
@@ -63,6 +61,8 @@ version from the
 
 ## Usage
 
+![Plugin configuration screen](readme/screenshot.png)
+ 
 ### Activating the plugin
 
 ### Customising plugin operation

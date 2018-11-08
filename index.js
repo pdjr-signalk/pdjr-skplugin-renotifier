@@ -140,7 +140,7 @@ module.exports = function(app) {
 		try {
 			var streams = (options.paths.match(/\S+/g).map(p => app.streambundle.getSelfBus("notifications." + p))) || [];
 			if (streams.length > 0) {
-				logN("Connected to " + streams.length + " notification streams");
+				logN("connected to " + streams.length + " notification stream" + ((streams.length == 1)?"":"s"));
 				unsubscribes.push(bacon.mergeAll(streams).onValue(function(v) {
 					options.notifiers.filter(n => (n['triggerstates'].includes(v['value']['state']) && (n['arguments'] != ""))).forEach(function(notifier) {
 						var command = __dirname + "/bin/" + notifier['name'];
