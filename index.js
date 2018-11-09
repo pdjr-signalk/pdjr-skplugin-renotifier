@@ -30,23 +30,25 @@ module.exports = function(app) {
 	plugin.description = "Take external action on a Signal K notification";
 
 	plugin.schema = function() {
+		
 		return({	
 			type: "object",
 			properties: {
 				scan: {
 					title: "Scan script directory",
 					type: "boolean",
-					default: true
+					default: false
 				},
 				paths: {
 					title: "Trigger paths",
+					description: "Enter one or more whitespace separated notification paths",
 					type: "string",
 					default: ""
 				},
 				notifiers: {
 					title: "Notifiers",
 					type: "array",
-					default: [],
+					default: loadNotifiers([]),
 					items: {
 						type: "object",
 						properties: {
@@ -115,7 +117,7 @@ module.exports = function(app) {
 		//
 		if (options.scan) {
 			try {
-				var updatednotifiers = loadNotifierOptionsFromDisk(options.notifiers);
+				var updatednotifiers = loadNotifiers(options.notifiers);
 				options.notifiers = updatednotifiers;
 				options.scan = false;
 				try {
@@ -173,7 +175,7 @@ module.exports = function(app) {
 		return((args !== undefined)?args.split(/[ ,]+/):[]);
 	}
 
-	function loadNotifierOptionsFromDisk(notifieroptions) {
+	function loadNotifiers(notifieroptions) {
 		var retval = notifieroptions;
 
 		try {
