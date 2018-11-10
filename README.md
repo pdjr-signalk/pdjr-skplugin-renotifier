@@ -221,7 +221,7 @@ The `SMS` script installed with the plugin is listed below.
 
 ## Version history
 
-__1.0.0 November 2018__
+__1.0.0 November 2018__  
 First release.
 
 ## License
