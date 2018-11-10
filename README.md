@@ -219,6 +219,11 @@ The `SMS` script installed with the plugin is listed below.
 
 ## Notifications, warnings and errors
 
+## Version history
+
+__1.0.0 November 2018__
+First release.
+
 ## License
 
 __signalk-renotifier__ is released under Apache License 2.0.
