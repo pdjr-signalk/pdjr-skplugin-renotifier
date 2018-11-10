@@ -62,6 +62,12 @@ module.exports = function(app) {
 								type: "string",
 								default: ""
 							},
+							arguments: {
+								title: "Arguments",
+								description: "",
+								type: "string",
+								default: ""
+							},
 							triggerstates: {
 								title: "Trigger states",
 								type: "array",
@@ -71,11 +77,15 @@ module.exports = function(app) {
 								},
 								uniqueItems: true
 							},
-							arguments: {
-								title: "Arguments",
-								description: "",
-								type: "string",
-								default: ""
+							mode: {
+								title: "Operating mode",
+								type: "array",
+								items: {
+									type: "string",
+									enum: ["normal","log","test"]
+									
+								},
+								uniqueItems: true
 							}
 						}
 					}
@@ -98,6 +108,14 @@ module.exports = function(app) {
 					"ui:disabled": true
 				},
 				triggerstates: {
+					"ui:widget": {
+						component: "checkboxes",
+						options: {
+							inline: true
+						}
+					}
+				},
+				mode: {
 					"ui:widget": {
 						component: "checkboxes",
 						options: {
@@ -142,11 +160,11 @@ module.exports = function(app) {
 		try {
 			var streams = (options.paths.match(/\S+/g).map(p => app.streambundle.getSelfBus("notifications." + p))) || [];
 			if (streams.length > 0) {
-				logN("connected to " + streams.length + " notification stream" + ((streams.length == 1)?"":"s"));
+				logN("Connected to " + streams.length + " notification stream" + ((streams.length == 1)?"":"s"));
 				unsubscribes.push(bacon.mergeAll(streams).onValue(function(v) {
 					options.notifiers.filter(n => (n['triggerstates'].includes(v['value']['state']) && (n['arguments'] != ""))).forEach(function(notifier) {
 						var command = __dirname + "/bin/" + notifier['name'];
-						var args = sanitizeArguments(notifier['arguments']);
+						var args = sanitizeArguments(((notifier['mode'] == 'normal')?"":("-" + notifier['mode'].charAt(0))) + " " + notifier['arguments']);
 						var exitcode = 0, stdout = "", stderr = "";
 						var child = spawn(command, args, { shell: true, env: process.env });
 						child.stdout.on('data', (data) => { stdout+=data; });
@@ -183,18 +201,21 @@ module.exports = function(app) {
 				var description = "";
 				var triggerstates = [];
 				var arguments = "";
+				var mode = [];
 
 				try { description = execSync(NOTIFIER_DIRECTORY + entry).toString().trim(); } catch(err) {  }
 				if (notifieroptions.map(v => v['name']).includes(entry)) {
-					triggerstates = notifieroptions.reduce((a,v) => ((a !== undefined)?a:((v['name'] == entry)?v['triggerstates']:a)),undefined);
 					arguments = notifieroptions.reduce((a,v) => ((a !== undefined)?a:((v['name'] == entry)?v['arguments']:a)),undefined);
+					triggerstates = notifieroptions.reduce((a,v) => ((a !== undefined)?a:((v['name'] == entry)?v['triggerstates']:a)),undefined);
+					mode = notifieroptions.reduce((a,v) => ((a !== undefined)?a:((v['name'] == entry)?v['mode']:a)),undefined);
 				}
 				
 				return({
 					"name": entry,
 					"description": description,
+					"arguments": arguments,
 					"triggerstates": triggerstates,
-					"arguments": arguments
+					"mode": mode
 				});
 			});
 		} catch(e) {

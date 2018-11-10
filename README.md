@@ -81,14 +81,15 @@ notifiers by scanning scripts in the plugin's `bin/` folder.
 The plugin configuration page at _Server->Plugin config->Renotifier_ offers
 the following configuration options.
 
-__Scan script directory__.
+__Scan script directory__  
 Checkbox requesting that the list of _Notifiers_ (see below) be re-built by
 scanning the plugin's `bin/` folder for executable scripts.
-Default is true (to cause the _Notifiers_ list to built on first execution).
+The _Notifiers_ list is created when the plugin first executes so if new
+notifier scripts are added this option must be invoked.
 Check this option to re-initialise the list of notifiers (any configuration of
 existing entries in _Notifiers_ will be retained).
 
-__Trigger paths__.
+__Trigger paths__  
 List of the __Signal K Node__ pathnames which should be monitored by the plugin.
 Default is '*' (monitor all paths).
 Enter here a list of whitespace separated (newline works best) Signal K paths,
@@ -101,7 +102,7 @@ of the form "tanks.wasteWater.0.currentLevel" will cause the plugin to look
 out for notifications on this data point only whilst "tanks.*" would select
 notifications related to all tanks.
  
-__Notifiers__.
+__Notifiers__  
 List of notifier (scripts) and their options.
 Default is the list of all notifier scripts in the `bin/` folder in the
 plugin's installation directory.
@@ -109,24 +110,18 @@ Entries in the list can be deleted and the list can be re-built (by re-scanning
 the `bin/` folder) using the _Scan script directory_ option described above.
 Each notifier in the list can be configured through the following options.
 
-__Name__.
+__Name__  
 The name of the notifier (actually the filename of the notifier script in the
 plugin's `bin/` directory).
 This option cannot be changed.
 
-__Description__.
+__Description__  
 A short description of the notifier (as reported by the notifier script when
 run with no arguments).
 This option cannot be changed and should explain what values the notifier
 script will accept for the _Arguments_ option (see below).
 
-__Trigger states__.
-The notification states which should cause execution of the notifier script.
-The default value is to not trigger at all.
-Check the notification states which should cause the notifier script to
-execute when a notification appears on one of the _Trigger paths_.
-
-__Arguments__.
+__Arguments__  
 A comma or space separated list of values which should be passed to the notifier
 script as arguments.
 The default value is no arguments and the system will accept a maximum of
@@ -137,6 +132,18 @@ indicate the recipient(s) of the notification.
 For example, in the case of the `SMS` notifier script included in the plugin
 distribution this option should contain a list of the cellphone numbers
 to which notification texts should be sent.
+
+__Trigger states__  
+The notification states which should cause execution of the notifier script.
+The default value is to not trigger at all.
+Check the notification states which should cause the notifier script to
+execute when a notification appears on one of the _Trigger paths_.
+
+__Execution mode__  
+The mode in which the plugin should execute this notifier.
+Options are "normal" (execute notifier script without exhaustive logging),
+"log" (execute notifier script and log every invocation) and "test"
+(do not execute notifier script, but do log the invocation).
 
 ### Notifier scripts
 
