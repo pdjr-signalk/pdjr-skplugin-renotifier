@@ -18,8 +18,13 @@ const { spawn } = require('child_process');
 const { execSync } = require('child_process');
 const fs = require('fs');
 const bacon = require('baconjs');
+const Schema = require("./lib/schema.js");
+const Log = require("./lib/log.js");
 
-const NOTIFIER_DIRECTORY = __dirname + "/bin/";
+const PLUGIN_SCHEMA_FILE = __dirname + "/schema.json";
+const PLUGIN_UISCHEMA_FILE = __dirname + "/uischema.json";
+const PLUGIN_SCRIPT_DIRECTORY = __dirname + "/script";
+const DEBUG = false;
 
 module.exports = function(app) {
 	var plugin = {};
@@ -29,128 +34,39 @@ module.exports = function(app) {
 	plugin.name = "Renotifier";
 	plugin.description = "Take external action on a Signal K notification";
 
+    const log = new Log(app.setProviderStatus, app.setProviderError, plugin.id);
+
+    /**
+     * Load plugin schema from disk file and add a default list of notifiers
+     * garnered from the plugin script directory.  The names of these
+     * notifiers are saved so that they can be added as checkbox options to
+     * subsequently identified notification paths.
+     */
 	plugin.schema = function() {
-		
-		return({	
-			type: "object",
-			properties: {
-				scan: {
-					title: "Scan script directory",
-					type: "boolean",
-					default: false
-				},
-				paths: {
-					title: "Trigger paths",
-					description: "Enter one or more whitespace separated notification paths",
-					type: "string",
-					default: ""
-				},
-				notifiers: {
-					title: "Notifiers",
-					type: "array",
-					default: loadNotifiers([]),
-					items: {
-						type: "object",
-						properties: {
-							name: {
-								title: "Name",
-								type: "string",
-								default: ""
-							},
-							description: {
-								title: "Description",
-								type: "string",
-								default: ""
-							},
-							arguments: {
-								title: "Arguments",
-								description: "",
-								type: "string",
-								default: ""
-							},
-							triggerstates: {
-								title: "Trigger states",
-								type: "array",
-								items: {
-									type: "string",
-									enum: ["normal","alert","alarm","emergency"]
-								},
-								uniqueItems: true
-							},
-							mode: {
-								title: "Operating mode",
-								type: "array",
-								items: {
-									type: "string",
-									enum: ["normal","log","test"]
-									
-								},
-								uniqueItems: true
-							}
-						}
-					}
-				}
-			}
-		});
-	}
+        var schema = Schema.createSchema(PLUGIN_SCHEMA_FILE);
+        var notifiers = loadNotifiers(PLUGIN_SCRIPT_DIRECTORY);
+        schema.insertValue("properties.notifiers.default", notifiers);
+        schema.insertValue("properties.triggers.items.properties.notifiers.items.enum", notifiers.map(notifier => notifier["name"]));
+        return(schema.getSchema());
+    };
  
-	plugin.uiSchema = {
-		paths: {
-			"ui:widget": "textarea"
-		},
-		notifiers: {
-			"ui:options": {
-				addable: false,
-				orderable: false
-			},
-			items: {
-				name: {
-					"ui:disabled": true
-				},
-				triggerstates: {
-					"ui:widget": {
-						component: "checkboxes",
-						options: {
-							inline: true
-						}
-					}
-				},
-				mode: {
-					"ui:widget": {
-						component: "checkboxes",
-						options: {
-							inline: true
-						}
-					}
-				}
-			}
-		}
-	}
+	plugin.uiSchema = function() {
+        var schema = Schema.createSchema(PLUGIN_UISCHEMA_FILE);
+        return(schema.getSchema());
+    }
 
 	plugin.start = function(options) {
 
-		// If the scan option is true, then we need to rebuild the list of
-		// notifier scripts by loading entries from the plugin's bin/ folder
-		// and saving them to the plugin options.
-		//
-		if (options.scan) {
-			try {
-				var updatednotifiers = loadNotifiers(options.notifiers);
-				options.notifiers = updatednotifiers;
-				options.scan = false;
-				try {
-					app.savePluginOptions(options);
-					logN("plugin notifier list updated from disk");
-				} catch(e) {
-					logE("cannot save configuration options: " + e);
-					return;
-				}
-			} catch(e) {
-				logE("cannot scan script directory: " + e);
-				return;
-			}
-		}
-
+        // Check the script files available on disk and update options to
+        // reflect any changes.
+        //
+        options.notifiers = loadNotifiers(PLUGIN_SCRIPT_DIRECTORY);
+        console.log(JSON.stringify(options.notifiers));
+        options.triggers.forEach(trigger => {
+            console.log(trigger.notifiers);
+            trigger.notifiers = trigger.notifiers.filter(nf => options.notifiers.map(v => v.name).includes(nf));
+        });
+        app.savePluginOptions(options, function(err) { if (err) log.W("update of plugin options failed: " + err); });
 
 		// Start production by subscribing to the Signal K paths that are
 		// identifed in the configuration options.  Each time a notification
@@ -158,25 +74,32 @@ module.exports = function(app) {
 		// of the active notifier scripts.
 		//
 		try {
-			var streams = (options.paths.match(/\S+/g).map(p => app.streambundle.getSelfBus("notifications." + p))) || [];
+			var streams = options.triggers.filter(trigger => (trigger.conditions.length > 0)).map(trigger => app.streambundle.getSelfBus("notifications." + trigger.path));
 			if (streams.length > 0) {
-				logN("Connected to " + streams.length + " notification stream" + ((streams.length == 1)?"":"s"));
-				unsubscribes.push(bacon.mergeAll(streams).onValue(function(v) {
-					options.notifiers.filter(n => (n['triggerstates'].includes(v['value']['state']) && (n['arguments'] != ""))).forEach(function(notifier) {
-						var command = __dirname + "/bin/" + notifier['name'];
-						var args = sanitizeArguments(((notifier['mode'] == 'normal')?"":("-" + notifier['mode'].charAt(0))) + " " + notifier['arguments']);
-						var exitcode = 0, stdout = "", stderr = "";
-						var child = spawn(command, args, { shell: true, env: process.env });
-						child.stdout.on('data', (data) => { stdout+=data; });
-						child.stderr.on('data', (data) => { stderr+=data; });
-						child.stdin.write(v['value']['message']); child.stdin.end();
-						child.on('close', (code) => { logE("Complete " + stdout + stderr); });
-						child.on('error', (code) => { logE("Failed" + stdout + stderr); });
-					});
+				log.N("Connected to " + streams.length + " notification stream" + ((streams.length == 1)?"":"s"));
+				unsubscribes.push(bacon.mergeAll(streams).onValue(stream => {
+                    var conditions = options.triggers.reduce((a,trigger) => ((("notifications." + trigger.path) == stream.path)?trigger.conditions:a), []);
+                    var notifiers = options.triggers.reduce((a,trigger) => ((("notifications." + trigger.path) == stream.path)?trigger.notifiers:a), []);
+                    if (conditions.includes(stream.value.state)) {
+                        options.notifiers.filter(notifier => (notifiers.includes(notifier.name))).forEach(notifier => {
+				            var command = PLUGIN_SCRIPT_DIRECTORY + "/" + notifier['name'];
+						    var args = sanitizeArguments(notifier.options.join(' ') + " " + notifier.arguments);
+						    var exitcode = 0, stdout = "", stderr = "";
+						    var child = spawn(command, args, { shell: true, env: process.env });
+						    child.stdout.on('data', (data) => { stdout+=data; });
+						    child.stderr.on('data', (data) => { stderr+=data; });
+						    child.stdin.write(stream['value']['message']); child.stdin.end();
+						    child.on('close', (code) => { log.N("Notified: " + stream.value.message); });
+						    child.on('error', (code) => { log.E("Failed" + stdout + stderr); });
+                        });
+                    }
 				}));
-			}
+			} else {
+                log.E("there are no viable trigger streams");
+                return;
+            }
 		} catch(e) {
-			logE("Failed " + e);
+			log.E("Failed " + e);
 			return;
 		}
 	}
@@ -193,48 +116,22 @@ module.exports = function(app) {
 		return((args !== undefined)?args.split(/[ ,]+/):[]);
 	}
 
-	function loadNotifiers(notifieroptions) {
-		var retval = notifieroptions;
+	function loadNotifiers(directory, notifiers) {
+        if (DEBUG) console.log("loadNotifiers('" + directory + "', " + JSON.stringify(notifiers) + ")...");
+		var retval = [];
 
 		try {
-			retval = fs.readdirSync(NOTIFIER_DIRECTORY).map(function(entry) {
+			retval = fs.readdirSync(directory).map(entry => {
 				var description = "";
-				var triggerstates = [];
-				var arguments = "";
-				var mode = [];
-
-				try { description = execSync(NOTIFIER_DIRECTORY + entry).toString().trim(); } catch(err) {  }
-				if (notifieroptions.map(v => v['name']).includes(entry)) {
-					arguments = notifieroptions.reduce((a,v) => ((a !== undefined)?a:((v['name'] == entry)?v['arguments']:a)),undefined);
-					triggerstates = notifieroptions.reduce((a,v) => ((a !== undefined)?a:((v['name'] == entry)?v['triggerstates']:a)),undefined);
-					mode = notifieroptions.reduce((a,v) => ((a !== undefined)?a:((v['name'] == entry)?v['mode']:a)),undefined);
-				}
-				
-				return({
-					"name": entry,
-					"description": description,
-					"arguments": arguments,
-					"triggerstates": triggerstates,
-					"mode": mode
-				});
-			});
-		} catch(e) {
-			throw("error reading script directory");
-		}
+                try {
+                    description = execSync(directory + "/" + entry).toString().trim();
+				    var notifier = (notifiers !== undefined)?(notifiers.reduce((a,v) => ((v['name'] == entry)?v:a), null)):null;
+				    return((notifier != null)?notifier:{"name": entry,"description": description,"arguments": "","triggerstates": [],"options": [] });
+                } catch(err) { }
+            });
+		} catch(err) { }
 		return(retval);
 	}
-
-	function log(prefix, terse, verbose) {
-		if (verbose) console.log(plugin.id + ": " + prefix + ": " + verbose);
-		if (terse) {
-			if (prefix !== "error") { app.setProviderStatus(terse); } else { app.setProviderError(terse); }
-		}
-	}
-
-	function logE(terse, verbose) { log("error", terse, (verbose === undefined)?terse:verbose); }
-	function logW(terse, verbose) { log("warning", terse, (verbose === undefined)?terse:verbose); }
-	function logN(terse, verbose) { log("notice", terse, (verbose === undefined)?terse:verbose); }
-
 
 	return plugin;
 }

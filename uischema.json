@@ -1,0 +1,56 @@
+{
+	"triggers": {
+		"items": {
+            "conditions": {
+				"ui:widget": {
+					"component": "checkboxes",
+					"options": {
+						"inline": true
+					}
+				}
+            },         
+            "notifiers": {
+				"ui:widget": {
+					"component": "checkboxes",
+					"options": {
+						"inline": true
+					}
+				}
+            }         
+        }
+	},
+	"notifiers": {
+        "ui:field": "collapsible",
+        "collapse": {
+            "field": "ArrayField",
+            "wrapClassName": "panel-group"
+        },
+		"ui:options": {
+            "removable": false,
+			"addable": false,
+			"orderable": false
+		},
+		"items": {
+			"name": {
+				"ui:disabled": true,
+                "classNames": "col-sm-3"
+			},
+			"description": {
+				"ui:disabled": true,
+                "classNames": "col-sm-9"
+			},
+			"options": {
+                "classNames": "col-sm-3",
+				"ui:widget": {
+					"component": "checkboxes",
+					"options": {
+						"inline": true
+					}
+				}
+			},
+			"arguments": {
+                "classNames": "col-sm-9"
+			}
+		}
+	}
+}

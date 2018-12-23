@@ -1,0 +1,41 @@
+#!/bin/bash
+# Send Signal K notifications to a black-hole.
+# Usage: null [-n] [-l] args...
+
+COMMAND="/usr/bin/logger"
+LOGGER="/usr/bin/logger"
+MODE="normal"
+LOG=""
+
+if [ $# -eq 0 ]; then
+	echo "Send Signal K notifications to a black hole"
+	exit 0
+fi
+
+if hash ${COMMAND} 2>/dev/null ; then
+	MESSAGE=$(cat)
+	while [ "${1}" != "" ]; do
+		case ${1} in
+		    -n)	# Dry-run (i.e. don't do anything)
+                MODE="dryrun"
+                ;;
+            -l) # Log activity
+                LOG=yes
+                ;;
+		    *)  # Process argument
+                if [ "${LOG}" != "" ]; then
+                    ${LOGGER} "signalk-renotifier:null[${MODE}]: \"${MESSAGE}\" => ${COMMAND} ${1}"
+                fi
+			    if [ "${MODE}" == "normal" ] ; then
+				    ${COMMAND} ${1}
+			    fi
+			    ;;
+		esac
+		shift
+	done
+	exit 0
+else
+	>&2 echo "required program '${COMMAND}' is not available"
+	exit 1
+fi
+

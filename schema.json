@@ -1,0 +1,77 @@
+{	
+	"type": "object",
+	"properties": {
+		"triggers": {
+            "title": "Notification trigger paths",
+            "type": "array",
+            "default": [],
+            "items": {
+                "type": "object",
+				"required": ["path"],
+                "properties": {
+                    "path": {
+                        "title": "Notification trigger path (omit 'notifications.' prefix)",
+                        "type": "string",
+                        "default": ""
+                    },
+			        "conditions": {
+				        "title": "Trigger on these notification states",
+				        "type": "array",
+				        "items": {
+					        "type": "string",
+					        "enum": ["normal","alert","warn","alarm","emergency"]
+				        },
+				        "uniqueItems": true
+			        },
+                    "notifiers": {
+                        "title": "Use these notifiers",
+                        "type": "array",
+                        "default": [],
+				        "items": {
+					        "type": "string",
+					        "enum": []
+				        },
+				        "uniqueItems": true
+                    }
+                }
+            } 
+		},
+		"notifiers": {
+			"title": "Notifier scripts",
+			"type": "array",
+			"default": [],
+			"items": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"title": "Name",
+						"type": "string",
+						"default": ""
+					},
+					"description": {
+						"title": "Description",
+						"type": "string",
+						"default": ""
+					},
+					"options": {
+						"title": "Options",
+						"type": "array",
+						"items": {
+							"type": "string",
+							"enum": ["-n", "-l"],
+
+                            "enumNames": [ "Dry-run", "Log actions" ]
+						},
+						"uniqueItems": true
+					},
+					"arguments": {
+						"title": "Arguments",
+						"description": "",
+						"type": "string",
+						"default": ""
+					}
+				}
+			}
+		}
+	}
+}
