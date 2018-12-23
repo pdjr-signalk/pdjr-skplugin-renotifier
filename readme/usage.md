@@ -1,39 +1,3 @@
-# signalk-renotifier
-
-[Signal K Node server](https://github.com/SignalK/signalk-server-node)
-plugin which executes arbitrary external scripts in response to system
-notifications.
-
-The plugin was developed to provide a remote notification service and although
-this functional role determines the syntax of external script invocation it
-does not place arbitrary constraints on what a script can do.
-
-This documentation includes a case study of using __signalk-renotifier__ to
-implement a simple SMS-based notification service on the author's ship
-_Beatrice_.
-## System requirements
-
-__signalk-renotifier__ has no special system requirements that must be met
-prior to installation.
-
-For the plugin to operate notifications must be being raised on the host
-Signal K server: there are a number of notification plugins available in the
-Signal K appstore. 
-
-Of course, for the plugin to actually _do_ anything it requires one or more
-scripts which implement the actual renotification function.
-Two such specimen scripts are included with the distribution which provide
-cellular network messaging and email connectivity.
-Both of these have their own requirements for supporting hardware and
-infrastructure.
-## Installation
-
-Download and install __signalk-renotifier__ using the _Appstore_ link in your
-Signal K Node server console.
-The plugin can also be obtained from the 
-[project homepage](https://github.com/preeve9534/signalk-renotifier)
-and installed using
-[these instructions](https://github.com/SignalK/signalk-server-node/blob/master/SERVERPLUGINS.md).
 ## Usage
 
 __signalk-renotifier__ is confugured through the Signal K Node server plugin
