@@ -34,9 +34,9 @@ The plugin can also be obtained from the
 [project homepage](https://github.com/preeve9534/signalk-renotifier)
 and installed using
 [these instructions](https://github.com/SignalK/signalk-server-node/blob/master/SERVERPLUGINS.md).
-## Using signalk-renotifier to send SMS notifications
+### Installing for SMS notifications
 
-### Hardware
+#### Hardware
 
 The most straighforward hardware solution is to install a USB cellular modem
 on the Signal K server host and it is this approach that is discussed below.
@@ -51,7 +51,7 @@ _I use a Huawei E353 USB cellular modem (purchased on Ebay for a few Euros)
 connected to a (probably unnecessary) external antenna (purchased from a
 chandler for many tens of Euros)._
 
-### Software
+#### Software
 
 The software used by __signalk-renotier__ to access a cellular modem is
 [Gammu](https://wammu.eu/gammu/)
@@ -61,7 +61,7 @@ The __gammu__ documentation includes a list of supported modems and you should
 check that your device is on the list - or even better, check the list and
 then acquire a supported device.
 
-### Configuration
+#### Configuration
 
 After installing __gammu__ and connecting your USB modem, open a terminal and
 configure the cellular modem interface by:
@@ -126,7 +126,7 @@ so that it issues notifications using the __sms__ notification script.
 Otherwise, continue to install an SMS messaging service and configure its
 use.
 
-### Installing and configuring gammu-smsd
+#### Installing and configuring gammu-smsd
 
 The SMS messaging daemon, __gammu-smsd__ is distributed in most Linux variants
 separately from __gammu__, so begin by using your system's package manager to
