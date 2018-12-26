@@ -2,7 +2,7 @@
 # Send Signal K notifications by SMS
 # Usage: SMS [-n] [-l] args...
 
-COMMAND="/usr/bin/gammu-smsd-inject"
+COMMAND="/usr/local/bin/gammu"
 LOGGER="/usr/bin/logger"
 LOG=""
 MESSAGE=""
@@ -14,7 +14,6 @@ if [ $# -eq 0 ]; then
 fi
 
 if hash ${COMMAND} 2>/dev/null ; then
-${LOGGER} "Fuck me"
 	MESSAGE=$(cat)
 	while [ "${1}" != "" ]; do
 		case ${1} in
@@ -26,10 +25,10 @@ ${LOGGER} "Fuck me"
                 ;;
 		    *)  # Process telephone number argument
                 if [ "${LOG}" != "" ]; then
-				    ${LOGGER} "signalk-renotifier:sms[${MODE}]: ${COMMAND} TEXT ${1} -text \"${MESSAGE}\""
+				    logger "signalk-renotifier:sms[${MODE}]: \"${MESSAGE}\" => ${COMMAND} sendsms TEXT ${1}"
                 fi
 			    if [ "${MODE}" == "normal" ] ; then
-				    ${COMMAND} TEXT ${1} -text "${MESSAGE}"
+				    echo "${MESSAGE}" | ${COMMAND} sendsms TEXT ${1}
 			    fi
 			    ;;
 		esac

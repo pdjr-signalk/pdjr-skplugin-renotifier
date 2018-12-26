@@ -60,7 +60,7 @@ module.exports = function(app) {
         // Check the script files available on disk and update options to
         // reflect any changes.
         //
-        options.notifiers = loadNotifiers(PLUGIN_SCRIPT_DIRECTORY);
+        options.notifiers = loadNotifiers(PLUGIN_SCRIPT_DIRECTORY, options.notifiers);
         console.log(JSON.stringify(options.notifiers));
         options.triggers.forEach(trigger => {
             console.log(trigger.notifiers);
@@ -83,7 +83,7 @@ module.exports = function(app) {
                     if (conditions.includes(stream.value.state)) {
                         options.notifiers.filter(notifier => (notifiers.includes(notifier.name))).forEach(notifier => {
 				            var command = PLUGIN_SCRIPT_DIRECTORY + "/" + notifier['name'];
-						    var args = sanitizeArguments(notifier.options.join(' ') + " " + notifier.arguments);
+						    var args = sanitizeArguments(notifier.options.join(' ') + " " + notifier['arguments']);
 						    var exitcode = 0, stdout = "", stderr = "";
 						    var child = spawn(command, args, { shell: true, env: process.env });
 						    child.stdout.on('data', (data) => { stdout+=data; });

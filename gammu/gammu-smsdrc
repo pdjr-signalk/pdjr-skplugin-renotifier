@@ -1,0 +1,13 @@
+[gammu]
+device = /dev/ttyUSB0
+name = Phone on USB serial port Huawei_Technologies HUAWEI_Mobile
+connection = at
+
+[smsd]
+service = files
+logfile = syslog
+debuglevel = 0
+inboxpath = /var/spool/gammu/inbox/
+outboxpath = /var/spool/gammu/outbox/
+sentsmspath = /var/spool/gammu/sent/
+errorsmspath = /var/spool/gammu/error/
