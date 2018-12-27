@@ -7,9 +7,10 @@ Navigate to _Server->Plugin config_ and select the _Renotifier_ tab.
 ![Plugin configuration screen](readme/screenshot.png)
 
 The _Active_ checkbox tells the Signal K Node server whether or not to run the
-plugin: on first execution you should check this option, then review and amend
-the configuration options discussed below before clicking the _Submit_ button
-to save any changes and start the plugin.
+plugin: on first execution you should check this, before reviewing and
+amending the configuration options discussed below.
+Changes you make will only be saved and applied when you finally click the
+_Submit_ button.
 
 The plugin configuration pane has two sections:  a list of notification
 trigger paths and a (normally closed) list of notification scripts.

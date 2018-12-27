@@ -1,4 +1,4 @@
-DEPS= readme.md system-requirements.md installation.md sms.md usage.md
+DEPS= readme.md system-requirements.md installation.md usage.md
 
 ../README.md: $(DEPS)
 	cat $(DEPS) > ../README.md

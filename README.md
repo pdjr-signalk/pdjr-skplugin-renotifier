@@ -1,31 +1,25 @@
 # signalk-renotifier
 
 [Signal K Node server](https://github.com/SignalK/signalk-server-node)
-plugin which executes arbitrary external scripts in response to system
-notifications.
+plugin which executes arbitrary external _notification scripts_ in response to
+system notifications.
 
 The plugin was developed to provide a remote notification service and although
 this functional role determines the syntax of external script invocation it
 does not place arbitrary constraints on what a script can do.
 
-This documentation includes a case study of using __signalk-renotifier__ to
-implement a simple SMS-based notification service on the author's ship
-_Beatrice_.
+This distribution includes scripts which support distributing notifications by
+email and SMS. 
 ## System requirements
 
 __signalk-renotifier__ has no special system requirements that must be met
 prior to installation.
 
-For the plugin to operate notifications must be being raised on the host
-Signal K server: there are a number of notification plugins available in the
-Signal K appstore. 
-
-Of course, for the plugin to actually _do_ anything it requires one or more
-scripts which implement the actual renotification function.
-Two such specimen scripts are included with the distribution which provide
-cellular network messaging and email connectivity.
-Both of these have their own requirements for supporting hardware and
-infrastructure.
+Since this plugin's purpose is simply to distribute Signal K notifications, the
+Signal K server must be issuing notifications relating to the values you wish
+to monitor.
+There are a number of general purpose notification plugins available in the
+Signal K appstore which may satisfy this requirement. 
 ## Installation
 
 Download and install __signalk-renotifier__ using the _Appstore_ link in your
@@ -35,56 +29,84 @@ The plugin can also be obtained from the
 and installed using
 [these instructions](https://github.com/SignalK/signalk-server-node/blob/master/SERVERPLUGINS.md).
 
-A fresh 'out-of-the-box' instalationl of __signalk-renotifier__ supports just
+A fresh 'out-of-the-box' installation of __signalk-renotifier__ implements just
 the __null__ notification script which simply writes notification messages
 into the system log file.
-To get the plugin to do anything else it is necessary to add a purposed
-notification script.
-Two such scripts are provided with the installation: __email__ and __sms__.
-The __email__ script requires a isignificant supporting infrastructure which
-may not be commonly available and it is not discussed further.
-The __sms__ script requires just the presence of just a cellular modem and the
-following section explains how to configure this feature so that it is
+
+To get the plugin to actually distribute notifications it is necessary to add
+one or more notification scripts which perform the required function.
+Two such scripts, __email__ and __sms__, are provided with the plugin.
+
+The __email__ script simply passes notification messages to the local mail
+transfer agent.
+If you have a working email system on the Signal K host, then this should
+work out of the box.
+
+The __sms__ script requires the presence of a cellular modem and the
+section below explains how to configure this feature so that it is
 available to the plugin. 
-### Installing for SMS notifications
+
+### Installing the email script
+
+The __email__ script assumes that the host system has a configured and working
+email system.
+The script uses the  __mail__(1) program to pass a notification to the mail
+transfer agent: in the unlikely event that this is not installed on your
+system use your system's package manger to install the _mailutils_ package.
+
+To install __signalk-renotifier__'s __email__ notification script, open a
+terminal and enter the following commands:
+```
+$> cd ~/.signalk/node_modules/signalk-renotifier
+$> make email
+```
+No further action is necessary.
+
+You can use the command `make remove-email` to delete the __email__ script if
+you no longer require it.
+
+### Installing the sms script
 
 #### Hardware
 
-The most straighforward hardware solution is to install a USB cellular modem
-on the Signal K server host and it is this approach that is discussed below.
+__signalk-renotifier__'s __sms__ script requires access to a cellular modem
+connected to the Signal K Node server.
+On most systems, the most straighforward way of achieving this is to install a
+USB cellular modem and it is this approach that is discussed below.
+
+The plugin has been tested with a Huawei E353 USB cellular modem (purchased on
+Ebay for a few Euros) connected to a (probably unnecessary) external antenna
+(purchased from a chandler for many tens of Euros).
 
 Many, but not all, cellular modems are supported by __signalk-renotifier__'s
-software stack, so it may be best to check that yours is (see below).
-In any case, make sure that your modem is unlocked and that the SIM you intend
-to use has passwords disabled (pop it in a phone to check and, if necessary,
-switch password protection off).
-
-_I use a Huawei E353 USB cellular modem (purchased on Ebay for a few Euros)
-connected to a (probably unnecessary) external antenna (purchased from a
-chandler for many tens of Euros)._
+software stack.
+Make sure that your modem is unlocked and that the SIM you intend to use has
+passwords disabled (pop it in a phone to check and, if necessary, switch
+password protection off).
 
 #### Software
 
 The software used by __signalk-renotier__ to access a cellular modem is
-[Gammu](https://wammu.eu/gammu/)
-which is part of most modern Linux distributions and can be installed using
-your system's package manager.
+[Gammu](https://wammu.eu/gammu/).
+This software is part of most modern Linux distributions and can be installed
+using your system's package manager.
 The __gammu__ documentation includes a list of supported modems and you should
-check that your device is on the list - or even better, check the list and
+check that your device is on the list - or, even better, check the list and
 then acquire a supported device.
 
 #### Configuration
 
 After installing __gammu__ and connecting your USB modem, open a terminal and
-configure the cellular modem interface by:
+install and configure the cellular modem interface by:
 
 ```
 $> cd ~/.signalk/node_modules/signalk-renotifier
 $> make sms
 ```
-This command uses __gammu-detect__(1) to try and auto-detect your modem and
+This command uses __gammu-detect__(1) to detect your modem and attempts to
 generate the __gammu__ configuration file at `/etc/gammurc`.
-Use the following command to check the result.
+Use the following command to check the result - the output should look
+something like that displayed below.
 ```
 $> gammu identify
 Device               : /dev/ttyUSB0
@@ -113,40 +135,38 @@ text messages, then you can proceed, firstly by making a decision on how you
 would like __signalk-renotifier__ to interact with __gammu__.
 There are two options:
 
-*   Option 1: send SMS messages directly from __signalk-renotifier__
+1. Send SMS messages directly
 
-    In this case, the plugin uses the __sms-gammu__ script to directly invoke
-    __gammu__ each time it needs to send a notification text.
-    This is the simplest solution for achieving SMS output, but has the
-    disadvantage of requiring exclusive access to the cellular modem and also
-    not scaling well if a number of SMS messages need to be sent at the
-    same time.
+In this case, the plugin uses a script to directly invoke __gammu__ each time
+it needs to send a notification text.
+This is the simplest solution for achieving SMS output, but has the
+disadvantage of requiring exclusive access to the cellular modem and also not
+scaling well if a number of SMS messages need to be sent at the same time.
 
-*   Option 2: send SMS messages using a local SMS messaging service
+2. Send SMS messages using a local messaging service
 
-    In this case, the plugin uses the __sms-gammusmsd__ script to inject
-    messages into the outbox of an executing SMS messaging daemon.
-    This is a more complex solution which requires the installation and
-    configuration of __gammu-smsd__(1) as a system service, but has the
-    benefit of scaling well and allowing the cellular modem to be used by
-    programs other than just __signalk-renotifier__.
+In this case, the plugin uses the __sms-gammusmsd__ script to inject messages
+into the outbox of an executing SMS messaging daemon.
+This is a more complex solution which requires the installation and
+configuration of __gammu-smsd__(1) as a system service, but has the benefit of
+scaling well and allowing the cellular modem to be used by programs other than
+just __signalk-renotifier__.
 
-Option 1 is configured by default and if you choose this, then no further
-action is required: you can revert to setting up __signalk-renotifier__
-so that it issues notifications using the __sms__ notification script.
+Option 1 is configured by default and if you choose this then no further
+action is required and you can revert to setting up __signalk-renotifier__ so
+that it issues notifications using the __sms__ notification script.
 
-Otherwise, continue to install an SMS messaging service and configure its
-use.
+Otherwise, continue to install an SMS messaging service and configure its use.
 
 #### Installing and configuring gammu-smsd
 
 The SMS messaging daemon, __gammu-smsd__ is distributed in most Linux variants
 separately from __gammu__, so begin by using your system's package manager to
-install __gammu-smsd__ and any dependencies.
+install the  _gammu-smsd_ package and any dependencies.
 
 On most Linux distributions __gammu-smsd__ installation creates a 'gammu' user
 and group and the directory `/var/spool/gammu/`.
-What follows assumes these events have taken place; if not, then you should
+What follows assumes these actions have taken place; if not, then you should
 create the user, group and directory by hand.
 
 Install and start the __gammu-smsd__ service by:
@@ -178,9 +198,10 @@ Navigate to _Server->Plugin config_ and select the _Renotifier_ tab.
 ![Plugin configuration screen](readme/screenshot.png)
 
 The _Active_ checkbox tells the Signal K Node server whether or not to run the
-plugin: on first execution you should check this option, then review and amend
-the configuration options discussed below before clicking the _Submit_ button
-to save any changes and start the plugin.
+plugin: on first execution you should check this, before reviewing and
+amending the configuration options discussed below.
+Changes you make will only be saved and applied when you finally click the
+_Submit_ button.
 
 The plugin configuration pane has two sections:  a list of notification
 trigger paths and a (normally closed) list of notification scripts.

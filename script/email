@@ -1,6 +1,0 @@
-#!/bin/bash
-
-if [ "$#" -eq 0 ]; then
-	echo "Send Signal K notifications by email (arguments must be email addresses)"
-	exit 0
-fi
