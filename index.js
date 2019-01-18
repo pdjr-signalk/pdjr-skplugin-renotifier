@@ -61,9 +61,7 @@ module.exports = function(app) {
         // reflect any changes.
         //
         options.notifiers = loadNotifiers(PLUGIN_SCRIPT_DIRECTORY, options.notifiers);
-        console.log(JSON.stringify(options.notifiers));
         options.triggers.forEach(trigger => {
-            console.log(trigger.notifiers);
             trigger.notifiers = trigger.notifiers.filter(nf => options.notifiers.map(v => v.name).includes(nf));
         });
         app.savePluginOptions(options, function(err) { if (err) log.W("update of plugin options failed: " + err); });

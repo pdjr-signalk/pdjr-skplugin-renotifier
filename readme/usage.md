@@ -17,16 +17,14 @@ trigger paths and a (normally closed) list of notification scripts.
 
 ### Notification trigger paths  
 
-Each entry in this list specifies a Signal K notification path which may be
-used to trigger a notification script, defining the scripts which will be
-executed and the conditions under which execution will occur.
+Each entry in this list specifies a Signal K notification path which may
+trigger execution of one or more notification script, defines the scripts
+which will be executed and the conditions under which execution will occur.
 New entries can be created using the __[+]__ button and unwanted entries can
 be deleted using the __[x]__ button.
 
 On first execution of __signalk-renotifier__ this list will normally contain
 a single, blank, entry which should be completed.
-If the plugin `scripts/` directory contains no executable scripts, then this
-list will be empty.
 
 Each notification trigger path is configured through the following options. 
  
@@ -45,8 +43,10 @@ to execute should they appear on the specified trigger path.
 
 __Use these notifiers__  
 The notifier scripts which should be invoked when notification matching one of
-the chosen trigger states appears on the trigger path.
-Default is to use the `null` notification script.
+the chosen trigger states appears on the trigger path (if the plugin's
+`script/` directory contains no executable scripts, then this list will be
+empty).
+Default is to use no notification scripts.
 Select the script or scripts you wish to use.
 
 ### Notification scripts
@@ -54,14 +54,14 @@ Select the script or scripts you wish to use.
 This list is closed by default, click on the tab to open it.
 
 Each entry in the list shows an available script (i.e. one that exists in the
-plugin's `scripts/` directory) and specifies the options and arguments that
+plugin's `script/` directory) and specifies the options and arguments that
 are passed to the script when it is executed.
 
 The available configuration options are described below.
 
 __Name__  
 The name of the notification script (i.e. the filename of the notifier script
-in the plugin's `scripts/` directory).
+in the plugin's `script/` directory).
 This option cannot be changed.
 
 __Description__  
