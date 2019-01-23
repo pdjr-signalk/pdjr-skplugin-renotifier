@@ -35,6 +35,8 @@ module.exports = function(app) {
 	plugin.description = "Take external action on a Signal K notification";
 
     const log = new Log(app.setProviderStatus, app.setProviderError, plugin.id);
+    const VESSEL_NAME = app.getSelfPath("name") || "Unnamed Vessel";
+    const VESSEL_MMSI = app.getSelfPath("mmsi") || "--";
 
     /**
      * Load plugin schema from disk file and add a default list of notifiers
@@ -56,7 +58,6 @@ module.exports = function(app) {
     }
 
 	plugin.start = function(options) {
-
         // Check the script files available on disk and update options to
         // reflect any changes.
         //
@@ -75,21 +76,18 @@ module.exports = function(app) {
 			var streams = options.triggers.filter(trigger => (trigger.conditions.length > 0)).map(trigger => app.streambundle.getSelfBus("notifications." + trigger.path));
 			if (streams.length > 0) {
 				log.N("Connected to " + streams.length + " notification stream" + ((streams.length == 1)?"":"s"));
-				unsubscribes.push(bacon.mergeAll(streams).onValue(stream => {
-                    var conditions = options.triggers.reduce((a,trigger) => ((("notifications." + trigger.path) == stream.path)?trigger.conditions:a), []);
-                    var notifiers = options.triggers.reduce((a,trigger) => ((("notifications." + trigger.path) == stream.path)?trigger.notifiers:a), []);
-                    if (conditions.includes(stream.value.state)) {
-                        options.notifiers.filter(notifier => (notifiers.includes(notifier.name))).forEach(notifier => {
-				            var command = PLUGIN_SCRIPT_DIRECTORY + "/" + notifier['name'];
-						    var args = sanitizeArguments(notifier.options.join(' ') + " " + notifier['arguments']);
-						    var exitcode = 0, stdout = "", stderr = "";
-						    var child = spawn(command, args, { shell: true, env: process.env });
-						    child.stdout.on('data', (data) => { stdout+=data; });
-						    child.stderr.on('data', (data) => { stderr+=data; });
-						    child.stdin.write(stream['value']['message']); child.stdin.end();
-						    child.on('close', (code) => { log.N("Notified: " + stream.value.message); });
-						    child.on('error', (code) => { log.E("Failed" + stdout + stderr); });
-                        });
+				unsubscribes.push(bacon.mergeAll(streams).onValue(notification => {
+                    if (notification.value != null) {
+                        var conditions = options.triggers.reduce((a,trigger) => ((("notifications." + trigger.path) == notification.path)?trigger.conditions:a), []);
+                        var notifiers = options.triggers.reduce((a,trigger) => ((("notifications." + trigger.path) == notification.path)?trigger.notifiers:a), []);
+                        if (conditions.includes(notification.value.state)) {
+                            options.notifiers.filter(notifier => (notifiers.includes(notifier.name))).forEach(notifier => {
+				                var command = PLUGIN_SCRIPT_DIRECTORY + "/" + notifier['name'];
+						        var options = notifier['options'];
+                                var args = notifier['arguments'];
+                                performNotification(command, options, args, notification.value); 
+                            });
+                        }
                     }
 				}));
 			} else {
@@ -107,12 +105,23 @@ module.exports = function(app) {
 		unsubscribes = [];
 	}
 
-	/**
-	 * Convert args into an array of strings
-	 */
-	function sanitizeArguments(args) {
-		return((args !== undefined)?args.split(/[ ,]+/):[]);
-	}
+    function performNotification(command, options, args, notification) {
+	    var retval = null, exitcode = 0, stdout = "", stderr = "";
+        var argarr = (options || []).concat((args !== undefined)?args.split(/[ ,]+/):[]);
+	    var child = spawn(command, argarr, { shell: true, env: process.env });
+        if (child != null) {
+	        child.stdout.on('data', (data) => { stdout+=data; });
+	        child.stderr.on('data', (data) => { stderr+=data; });
+            child.stdin.write("VESSEL:" +  VESSEL_NAME + " (" + VESSEL_MMSI + ")\n");
+            child.stdin.write("STATE:" + notification.state + "\n");
+            child.stdin.write("METHOD:" + notification.method.join(" ") + "\n");
+		    child.stdin.write("MESSAGE:" + notification.message + "\n");
+            child.stdin.write("TIMESTAMP:" + notification.timestamp + "\n");
+            child.stdin.end();
+		    child.on('close', (code) => { log.N("Notified: " + stream.value.message); });
+		    child.on('error', (code) => { log.E("Failed" + stdout + stderr); });
+        }
+    }
 
 	function loadNotifiers(directory, notifiers) {
         if (DEBUG) console.log("loadNotifiers('" + directory + "', " + JSON.stringify(notifiers) + ")...");

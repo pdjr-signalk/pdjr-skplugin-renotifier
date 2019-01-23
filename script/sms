@@ -14,7 +14,19 @@ if [ $# -eq 0 ]; then
 fi
 
 if hash ${COMMAND} 2>/dev/null ; then
-${LOGGER} "Fuck me"
+    declare -A DICTIONARY
+    while read -r line; do
+        TOKEN=${line%%:*}
+        VALUE=${line#*:}
+        DICTIONARY[${TOKEN}]=${VALUE}
+    done <<< "$(cat)"
+
+MESSAGE=$(cat <<END_HEREDOC
+${DICTIONARY[STATE]} notification from ${DICTIONARY[VESSEL]}: ${DICTIONARY[MESSAGE]}
+END_HEREDOC
+)
+
+if hash ${COMMAND} 2>/dev/null ; then
 	MESSAGE=$(cat)
 	while [ "${1}" != "" ]; do
 		case ${1} in

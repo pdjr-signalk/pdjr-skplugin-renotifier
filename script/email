@@ -1,0 +1,65 @@
+#!/bin/bash
+# Send Signal K notifications by email
+# Usage: email [-n] [-l] args...
+
+SENDER="Beatrice of Hull <beatrice@pdjr.eu>"
+
+COMMAND="/usr/sbin/ssmtp"
+LOGGER="/usr/bin/logger"
+LOG=""
+MODE="normal"
+ADDRESSES=""
+
+if [ $# -eq 0 ]; then
+	echo "Send Signal K notifications by email (arguments must be email addresses)"
+	exit 0
+fi
+
+if hash ${COMMAND} 2>/dev/null ; then
+    declare -A DICTIONARY
+    while read -r line; do
+        TOKEN=${line%%:*}
+        VALUE=${line#*:}
+        DICTIONARY[${TOKEN}]=${VALUE}
+    done <<< "$(cat)"
+
+MESSAGE=$(cat <<END_HEREDOC
+From: ${SENDER}
+Subject: ${DICTIONARY[STATE]} notification from ${DICTIONARY[VESSEL]}
+
+The following ${DICTIONARY[STATE]} notification was issued at ${DICTIONARY[TIMESTAMP]}: 
+
+${DICTIONARY[MESSAGE]}
+
+--
+This email was sent automatically by the Signal K server on ${DICTIONARY[VESSEL]}
+END_HEREDOC
+)
+
+	while [ "${1}" != "" ]; do
+		case ${1} in
+		    -n)	# Dry-run (i.e. don't do anything)
+                MODE="dryrun"
+                ;;
+            -l) # Log activity
+                LOG="yes"
+                ;;
+		    *)  # Process email address arguments
+                ADDRESSES="${ADDRESSES} ${1}"
+			    ;;
+		esac
+		shift
+	done
+    if [ "${LOG}" != "" ]; then
+	    logger "signalk-renotifier:email[${MODE}]: \"${MESSAGE}\" => ${COMMAND} -s ${SUBJECT} ${ADDRESSES}"
+    fi
+    if [ "${MODE}" == "normal" ] ; then
+	    echo -e "${MESSAGE}" | ${COMMAND} ${ADDRESSES}
+    fi
+
+	exit 0
+else
+	>&2 echo "required program '${COMMAND}' is not available"
+	exit 1
+fi
+
