@@ -2,9 +2,9 @@
 # Send Signal K notifications by email
 # Usage: email [-n] [-l] args...
 
-SENDER="Beatrice of Hull <beatrice@pdjr.eu>"
+FROM="Beatrice of Hull <beatrice@pdjr.eu>"
 
-COMMAND="/usr/sbin/ssmtp"
+COMMAND="/usr/bin/mail"
 LOGGER="/usr/bin/logger"
 LOG=""
 MODE="normal"
@@ -23,11 +23,10 @@ if hash ${COMMAND} 2>/dev/null ; then
         DICTIONARY[${TOKEN}]=${VALUE}
     done <<< "$(cat)"
 
+   SUBJECT="${DICTIONARY[STATE]^^} notification from ${DICTIONARY[VESSEL]}"
+ 
 MESSAGE=$(cat <<END_HEREDOC
-From: ${SENDER}
-Subject: ${DICTIONARY[STATE]} notification from ${DICTIONARY[VESSEL]}
-
-The following ${DICTIONARY[STATE]} notification was issued at ${DICTIONARY[TIMESTAMP]}: 
+The following ${DICTIONARY[STATE]^^} notification was issued at ${DICTIONARY[TIMESTAMP]}: 
 
 ${DICTIONARY[MESSAGE]}
 
@@ -54,7 +53,7 @@ END_HEREDOC
 	    logger "signalk-renotifier:email[${MODE}]: \"${MESSAGE}\" => ${COMMAND} -s ${SUBJECT} ${ADDRESSES}"
     fi
     if [ "${MODE}" == "normal" ] ; then
-	    echo -e "${MESSAGE}" | ${COMMAND} ${ADDRESSES}
+	    echo -e "${MESSAGE}" | ${COMMAND} -s "${SUBJECT}" -a "From: ${FROM}" ${ADDRESSES}
     fi
 
 	exit 0

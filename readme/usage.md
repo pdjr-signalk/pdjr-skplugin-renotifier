@@ -33,7 +33,7 @@ This required option specifies the monitored Signal K notification path.
 Default is the empty string.
 Supply a notification path, omitting the 'notifications' prefix.
 Wildcards are acceptable: for example, you could use 'tanks.\*' to monitor all
-notification related to tank storage.
+notifications related to tank storage.
 
 __Trigger on these notification states__  
 The notification states which should cause execution of the notifier script.
