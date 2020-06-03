@@ -10,7 +10,7 @@
 				"required": ["path"],
                 "properties": {
                     "path": {
-                        "title": "Notification trigger path (omit 'notifications.' prefix)",
+                        "title": "Notification trigger path",
                         "type": "string",
                         "default": ""
                     },

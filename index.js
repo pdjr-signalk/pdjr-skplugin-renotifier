@@ -18,8 +18,8 @@ const { spawn } = require('child_process');
 const { execSync } = require('child_process');
 const fs = require('fs');
 const bacon = require('baconjs');
-const Schema = require("./lib/schema.js");
-const Log = require("./lib/log.js");
+const Schema = require("./lib/signalk-libschema/Schema.js");
+const Log = require("./lib/signalk-liblog/Log.js");
 
 const PLUGIN_SCHEMA_FILE = __dirname + "/schema.json";
 const PLUGIN_UISCHEMA_FILE = __dirname + "/uischema.json";
@@ -34,7 +34,7 @@ module.exports = function(app) {
 	plugin.name = "Renotifier";
 	plugin.description = "Take external action on a Signal K notification";
 
-    const log = new Log(app.setProviderStatus, app.setProviderError, plugin.id);
+    const log = new Log(plugin.id, { ncallback: app.setProviderStatus, ecallback: app.setProviderError });
     const VESSEL_NAME = app.getSelfPath("name") || "Unnamed Vessel";
     const VESSEL_MMSI = app.getSelfPath("mmsi") || "--";
 
@@ -73,13 +73,13 @@ module.exports = function(app) {
 		// of the active notifier scripts.
 		//
 		try {
-			var streams = options.triggers.filter(trigger => (trigger.conditions.length > 0)).map(trigger => app.streambundle.getSelfBus("notifications." + trigger.path));
+			var streams = options.triggers.filter(trigger => (trigger.conditions.length > 0)).map(trigger => app.streambundle.getSelfBus(trigger.path));
 			if (streams.length > 0) {
-				log.N("Connected to " + streams.length + " notification stream" + ((streams.length == 1)?"":"s"));
+				log.N("monitoring " + streams.length + " notification stream" + ((streams.length == 1)?"":"s"));
 				unsubscribes.push(bacon.mergeAll(streams).onValue(notification => {
                     if (notification.value != null) {
-                        var conditions = options.triggers.reduce((a,trigger) => ((("notifications." + trigger.path) == notification.path)?trigger.conditions:a), []);
-                        var notifiers = options.triggers.reduce((a,trigger) => ((("notifications." + trigger.path) == notification.path)?trigger.notifiers:a), []);
+                        var conditions = options.triggers.reduce((a,trigger) => ((trigger.path == notification.path)?trigger.conditions:a), []);
+                        var notifiers = options.triggers.reduce((a,trigger) => ((trigger.path == notification.path)?trigger.notifiers:a), []);
                         if (conditions.includes(notification.value.state)) {
                             options.notifiers.filter(notifier => (notifiers.includes(notifier.name))).forEach(notifier => {
 				                var command = PLUGIN_SCRIPT_DIRECTORY + "/" + notifier['name'];
@@ -118,8 +118,8 @@ module.exports = function(app) {
 		    child.stdin.write("MESSAGE:" + notification.message + "\n");
             child.stdin.write("TIMESTAMP:" + notification.timestamp + "\n");
             child.stdin.end();
-		    child.on('close', (code) => { log.N("Notified: " + stream.value.message); });
-		    child.on('error', (code) => { log.E("Failed" + stdout + stderr); });
+		    child.on('close', (code) => { log.N("Notified: "); });
+		    child.on('error', (code) => { log.E("Failed"); });
         }
     }
 
