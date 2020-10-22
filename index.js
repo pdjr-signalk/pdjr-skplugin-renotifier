@@ -121,41 +121,40 @@ module.exports = function(app) {
     unsubscribes = [];
   }
 
-    function performNotification(command, options, args, notification) {
-	    var retval = null, exitcode = 0, stdout = "", stderr = "";
-        var argarr = (options || []).concat((args !== undefined)?args.split(/[ ,]+/):[]);
-	    var child = spawn(command, argarr, { shell: true, env: process.env });
-        if (child != null) {
-	        child.stdout.on('data', (data) => { stdout+=data; });
-	        child.stderr.on('data', (data) => { stderr+=data; });
-            child.stdin.write("VESSEL:" +  VESSEL_NAME + " (" + VESSEL_MMSI + ")\n");
-            child.stdin.write("STATE:" + notification.state + "\n");
-            child.stdin.write("METHOD:" + notification.method.join(" ") + "\n");
-		    child.stdin.write("MESSAGE:" + notification.message + "\n");
-            child.stdin.write("TIMESTAMP:" + notification.timestamp + "\n");
-            child.stdin.end();
-		    child.on('close', (code) => { log.N("Notified: "); });
-		    child.on('error', (code) => { log.E("Failed"); });
-        }
+  function performNotification(command, options, args, notification) {
+    var retval = null, exitcode = 0, stdout = "", stderr = "";
+    var argarr = (options || []).concat((args !== undefined)?args.split(/[ ,]+/):[]);
+	var child = spawn(command, argarr, { shell: true, env: process.env });
+    if (child != null) {
+	  child.stdout.on('data', (data) => { stdout+=data; });
+	  child.stderr.on('data', (data) => { stderr+=data; });
+      child.stdin.write("VESSEL:" +  VESSEL_NAME + " (" + VESSEL_MMSI + ")\n");
+      child.stdin.write("STATE:" + notification.state + "\n");
+      child.stdin.write("METHOD:" + notification.method.join(" ") + "\n");
+	  child.stdin.write("MESSAGE:" + notification.message + "\n");
+      child.stdin.write("TIMESTAMP:" + notification.timestamp + "\n");
+      child.stdin.end();
+      child.on('close', (code) => { log.N("Notified: "); });
+	  child.on('error', (code) => { log.E("Failed"); });
     }
+  }
 
-	function loadNotifiers(directory, notifiers) {
-		var retval = [];
+  function loadNotifiers(directory, notifiers) {
+    var retval = [];
+    try {
+      retval = fs.readdirSync(directory).map(entry => {
+        var description = "";
+        try {
+          description = execSync(directory + "/" + entry).toString().trim();
+          var notifier = (notifiers !== undefined)?(notifiers.reduce((a,v) => ((v['name'] == entry)?v:a), null)):null;
+          return((notifier != null)?notifier:{ "name": entry, "description": description, "arguments": "", "triggerstates": [], "options": [] });
+        } catch(err) { }
+      });
+    } catch(err) { }
+    return(retval);
+  }
 
-		try {
-			retval = fs.readdirSync(directory).map(entry => {
-				var description = "";
-                try {
-                    description = execSync(directory + "/" + entry).toString().trim();
-				    var notifier = (notifiers !== undefined)?(notifiers.reduce((a,v) => ((v['name'] == entry)?v:a), null)):null;
-				    return((notifier != null)?notifier:{"name": entry,"description": description,"arguments": "","triggerstates": [],"options": [] });
-                } catch(err) { }
-            });
-		} catch(err) { }
-		return(retval);
-	}
-
-	return plugin;
+  return plugin;
 }
 
 
