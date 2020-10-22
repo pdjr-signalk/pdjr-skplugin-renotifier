@@ -126,6 +126,10 @@ module.exports = function(app) {
     unsubscribes = [];
   }
 
+  /********************************************************************
+   * Executes <command> in a separate shell.
+   */
+
   function performNotification(command, options, args, notification) {
     var retval = null, exitcode = 0, stdout = "", stderr = "";
     var argarr = (options || []).concat((args !== undefined)?args.split(/[ ,]+/):[]);
@@ -144,7 +148,22 @@ module.exports = function(app) {
     }
   }
 
-  function loadNotifiers(directory, notifiers) {
+  /********************************************************************
+   * Constructs and returns an array of notifier definitions by
+   * reconciling the contents of <directory> with the list of notifier
+   * definitions passed in <notifiers>. The supplied and returned
+   * definition lists have exacyly the same structure as the "notifiers"
+   * property in the plugin configuration file.
+   *
+   * Each file in <directory> is assumed to be a notifier script: if a
+   * script is represented by an entry in <notifiers>, then the entry
+   * is retained; if a script is not represented in <notifiers>, then
+   * a new entry describing the script is created; is an entry exists
+   * in <notifiers> but there is no corresponding script, then the
+   * entry is deleted. The reconciled <notifications> list is returned.
+   */
+ 
+  function loadNotifiers(directory, notifiers = []) {
     var retval = [];
     try {
       retval = fs.readdirSync(directory).map(entry => {
@@ -152,7 +171,7 @@ module.exports = function(app) {
         try {
           description = execSync(directory + "/" + entry).toString().trim();
           var notifier = (notifiers !== undefined)?(notifiers.reduce((a,v) => ((v['name'] == entry)?v:a), null)):null;
-          return((notifier != null)?notifier:{ "name": entry, "description": description, "arguments": "", "triggerstates": [], "options": [] });
+          return((notifier != null)?notifier:{ "name": entry, "description": description, "arguments": "", "options": [] });
         } catch(err) { }
       });
     } catch(err) { }
