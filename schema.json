@@ -4,6 +4,7 @@
 		"triggers": {
             "title": "Notification triggers",
             "type": "array",
+            "default": [],
             "items": {
                 "type": "object",
 				"required": [ "path", "conditions" ],
