@@ -36,14 +36,18 @@ The plugin can also be obtained from the
 and installed using
 [these instructions](https://github.com/SignalK/signalk-server-node/blob/master/SERVERPLUGINS.md).
 
+### Scripts
+
 A new installation of __signalk-renotifier__ includes three scripts:
 _email_, _null_ and _sms_ which may provide an interface to these
 services on your system.
-Or maybe not.
-Perhaps they will require tweaking.
+Or maybe not - perhaps you will have to tweak them to suit your
+environment.
+You can add additional scripts to the plugin by placing shell scripts
+in the plugin's ```script/``` directory.
 
 The software and hardware installations required to support each of
-these scripts are discussed below.
+the supplied scripts are discussed below.
 
 ### email 
 
@@ -62,6 +66,9 @@ to transfer outgoing email by SMTP to a well-connected remote mail
 transfer agent like those offered by Gmail.
 The __ssmtp__ documentation provides detailed instructions on how to
 set this up.
+
+You should edit the email script file so that the FROM variable sets an
+appropriate sender email address.
 
 ### null
 

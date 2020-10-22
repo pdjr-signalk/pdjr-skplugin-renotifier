@@ -25,7 +25,7 @@ const DebugLog = require("./lib/signalk-liblog/DebugLog.js");
 const PLUGIN_SCHEMA_FILE = __dirname + "/schema.json";
 const PLUGIN_UISCHEMA_FILE = __dirname + "/uischema.json";
 const PLUGIN_SCRIPT_DIRECTORY = __dirname + "/script";
-const DEBUG_TOKENS = [ ];
+const DEBUG_TOKENS = [ "scriptupdates", "triggers" ];
 
 module.exports = function(app) {
   var plugin = {};
@@ -67,7 +67,7 @@ module.exports = function(app) {
     options.triggers.forEach(trigger => {
       trigger.notifiers = trigger.notifiers.filter(nf => options.notifiers.map(v => v.name).includes(nf));
     });
-    app.savePluginOptions(options, function(err) { if (err) log.W("update of plugin options failed: " + err); });
+    app.savePluginOptions(options, function(err) { if (err) log.E("update of plugin options failed: " + err); });
 
     // Start production by subscribing to the Signal K paths that are
 	// identifed in the configuration options.  Each time a notification
@@ -79,6 +79,7 @@ module.exports = function(app) {
       trigger.path = (trigger.path || "").trim();
       trigger.conditions = trigger.conditions || [];
       trigger.notifiers = trigger.notifiers || [];
+      debuglog("triggers", "processing trigger %o", trigger);
       if (trigger.path != "") {
         if (trigger.conditions.length > 0) { 
           if (trigger.notifiers.length > 0) { 
