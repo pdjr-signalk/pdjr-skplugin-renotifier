@@ -2,14 +2,14 @@
 	"type": "object",
 	"properties": {
 		"triggers": {
-            "title": "Notification trigger paths",
+            "title": "Notification triggers",
             "type": "array",
             "items": {
                 "type": "object",
 				"required": [ "path", "conditions" ],
                 "properties": {
                     "path": {
-                        "title": "Notification trigger path",
+                        "title": "Notification path",
                         "type": "string",
                         "default": ""
                     },

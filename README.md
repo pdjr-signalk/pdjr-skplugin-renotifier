@@ -39,12 +39,13 @@ and installed using
 ### Scripts
 
 A new installation of __signalk-renotifier__ includes three scripts:
-_email_, _null_ and _sms_ which may provide an interface to these
-services on your system.
+_email_, _null_ and _sms_ which may provide an interface to services
+on your system.
 Or maybe not - perhaps you will have to tweak them to suit your
 environment.
 You can add additional scripts to the plugin by placing shell scripts
-in the plugin's ```script/``` directory.
+in the plugin's ```script/``` directory and restarting the Signal K
+server.
 
 The software and hardware installations required to support each of
 the supplied scripts are discussed below.
@@ -116,7 +117,7 @@ the _Submit_ button.
 The plugin configuration pane has two sections: a list of notification
 trigger paths and a list of notification scripts.
 
-### Notification trigger paths  
+### Notification triggers  
 
 Each entry in this list specifies a Signal K notification path which
 may trigger execution of one or more notification script, defines the
@@ -128,7 +129,7 @@ be deleted using the __[x]__ button.
 Each notification trigger path is configured through the following
 options. 
  
-__Notification trigger path__\
+__Notification path__\
 Specifies a Signal K notification path that should be monitored for
 notification events.
 Default is the empty string.
@@ -136,7 +137,7 @@ Enter a full notification path (wildcards are acceptable).
 
 __Trigger on these notification states__\
 The notification states which should cause execution of the notifier
-script.
+script(s).
 The default value is to not trigger at all.
 Check the notification states which should cause the notifier script to
 execute when they appear on the specified trigger path.
@@ -145,7 +146,7 @@ __Use these notifiers__\
 The notifier scripts which should be invoked when a notification
 matching one of the chosen trigger states appears on the trigger path.
 Note that if the plugin's `script/` directory contains no executable
-scripts, then this list will be empty.
+scripts, then these checkboxes will be empty.
 Default is to use no notification scripts.
 Select the script or scripts you wish to use.
 
