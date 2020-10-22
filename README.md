@@ -189,6 +189,17 @@ For example, in the case of the `SMS` notifier script included in the
 plugin distribution this option should contain a list of the cellphone
 numbers to which notification texts should be sent.
 
+## Debugging and logging
+
+The plugin understands the following debug keys.
+
+| Key                  | Meaning                                              |
+|:---------------------|:-----------------------------------------------------|
+| renotifier:\*        | Enable all keys.                                     |
+| renotifier:triggers  | Log notification trigger paths loaded by the plugin. |
+| renotifier:notifiers | Log notifier scripts accessible to the plugin.       |
+
+
 ## Author
 
 Paul Reeve <preeve@pdjr.eu>\

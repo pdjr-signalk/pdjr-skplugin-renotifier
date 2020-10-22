@@ -25,7 +25,7 @@ const DebugLog = require("./lib/signalk-liblog/DebugLog.js");
 const PLUGIN_SCHEMA_FILE = __dirname + "/schema.json";
 const PLUGIN_UISCHEMA_FILE = __dirname + "/uischema.json";
 const PLUGIN_SCRIPT_DIRECTORY = __dirname + "/script";
-const DEBUG_TOKENS = [ "scriptupdates", "triggers" ];
+const DEBUG_TOKENS = [ "triggers", "notifiers" ];
 
 module.exports = function(app) {
   var plugin = {};
@@ -36,7 +36,7 @@ module.exports = function(app) {
   plugin.description = "Execute external scripts in response to Signal K notification events.";
 
   const log = new Log(plugin.id, { ncallback: app.setPluginStatus, ecallback: app.setPluginError });
-  const debuglog = new DebugLog(plugin.id, DEBUG_TOKENS);
+  const debug = new DebugLog(plugin.id, DEBUG_TOKENS);
   const VESSEL_NAME = app.getSelfPath("name") || "Unnamed Vessel";
   const VESSEL_MMSI = app.getSelfPath("mmsi") || "--";
 
@@ -60,6 +60,8 @@ module.exports = function(app) {
   }
 
   plugin.start = function(options) {
+    debug.N("*", "available debug tokens: %s", debug.getKeys().join(", "));
+
     // Check the script files available on disk and update options to
     // reflect any changes.
     //
@@ -68,6 +70,7 @@ module.exports = function(app) {
       trigger.notifiers = trigger.notifiers.filter(nf => options.notifiers.map(v => v.name).includes(nf));
     });
     app.savePluginOptions(options, function(err) { if (err) log.E("update of plugin options failed: " + err); });
+    options.notifiers.forEach(notifier => debug.N("notifiers", "loading notifier %o", notifier));
 
     // Start production by subscribing to the Signal K paths that are
 	// identifed in the configuration options.  Each time a notification
@@ -79,7 +82,7 @@ module.exports = function(app) {
       trigger.path = (trigger.path || "").trim();
       trigger.conditions = trigger.conditions || [];
       trigger.notifiers = trigger.notifiers || [];
-      debuglog("triggers", "processing trigger %o", trigger);
+      debug.N("triggers", "loading trigger %o", trigger);
       if (trigger.path != "") {
         if (trigger.conditions.length > 0) { 
           if (trigger.notifiers.length > 0) { 
@@ -101,6 +104,7 @@ module.exports = function(app) {
           if (conditions.includes(notification.value.state)) {
             options.notifiers.filter(notifier => (notifiers.includes(notifier.name))).forEach(notifier => {
               try {
+                debug.N("triggers", "executing notification script %s", command);
 	            var command = PLUGIN_SCRIPT_DIRECTORY + "/" + notifier['name'];
                 var options = notifier['options'];
                 var args = notifier['arguments'];
