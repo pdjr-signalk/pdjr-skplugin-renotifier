@@ -1,88 +1,101 @@
 # signalk-renotifier
 
-[Signal K Node server](https://github.com/SignalK/signalk-server-node)
-plugin which executes arbitrary external _notification scripts_ in response to
-system notifications.
+Execute external scripts in response to Signal K notification events.
 
-The plugin was developed to provide a remote notification service and although
-this functional role determines the syntax of external script invocation it
-does not place arbitrary constraints on what a script can do.
+This project implements a plugin for the
+[Signal K Node server](https://github.com/SignalK/signalk-server-node).
 
-This distribution includes scripts which support distributing notifications by
-email and SMS. 
+Reading the [Alarm, alert and notification handling](http://signalk.org/specification/1.0.0/doc/notifications.html)
+section of the Signal K documentation may provide helpful orientation.
+
+__signalk-renotifier__ was developed to provide a remote notification
+service by building on existing operating system services.
+
+The plugin's method of operation is unsophisticated and boils down to
+"wait for some specified notification to appear and then execute a
+shell script".
+The distribution includes two scripts which support distributing
+notifications by email and SMS. 
+
+Use this plugin with care: there are potentially no limits on what a
+shell script can do... 
+
 ## System requirements
 
-__signalk-renotifier__ has no special system requirements that must be met
-prior to installation.
+__signalk-renotifier__ has no special system requirements that must be
+met prior to installation.
 
-Since this plugin's purpose is simply to distribute Signal K notifications, the
-Signal K server must be issuing notifications relating to the values you wish
-to monitor.
-There are a number of general purpose notification plugins available in the
-Signal K appstore which may satisfy this requirement. 
+If you intend to use the pluging to distribute notifications by email
+or SMS, then your system must already support these services.
+
 ## Installation
 
-Download and install __signalk-renotifier__ using the _Appstore_ link in your
-Signal K Node server console.
+Download and install __signalk-renotifier__ using the _Appstore_ link
+in your Signal K Node server console.
 The plugin can also be obtained from the 
 [project homepage](https://github.com/preeve9534/signalk-renotifier)
 and installed using
 [these instructions](https://github.com/SignalK/signalk-server-node/blob/master/SERVERPLUGINS.md).
 
-A fresh 'out-of-the-box' installation of __signalk-renotifier__ includes three
-notification scripts: _email_, _null_ and _sms_.
-The software and hardware installations required to support each of these are
-discussed below.
+A fresh 'out-of-the-box' installation of __signalk-renotifier__s
+ includes three notification scripts: _email_, _null_ and _sms_.
+The software and hardware installations required to support each of
+these are discussed below.
 
 ### email 
-This script uses __mail(1)__ to forward trigger notifications to recipients.
 
-If you already have an email system installed on your Signal K host which
-allows you to send mail from the operating system command line, then no
-further action should be necessary; if not, then you will need to install
-some sort of email service to correct this deficiency.
+This script uses __mail(1)__ to forward trigger notifications to
+recipients.
 
-If you don't have a permanent Internet connection, the one option is to use a
-simple mail forwarder like
+If you already have an email system installed on your Signal K host
+which allows you to send mail from the operating system command line,
+then no further action should be necessary; if not, then you will need
+to install some sort of email service to correct this deficiency.
+
+If you don't have a permanent Internet connection, the one option is to
+use a simple mail forwarder like
 [ssmtp](https://wiki.archlinux.org/index.php/SSMTP)
-to transfer outgoing email by SMTP to a well-connected remote mail transfer
-agent like those offered by Gmail.
-The __ssmtp__ documentation provides detailed instructions on how to set this
-up.
+to transfer outgoing email by SMTP to a well-connected remote mail
+transfer agent like those offered by Gmail.
+The __ssmtp__ documentation provides detailed instructions on how to
+set this up.
 
 ### null
-This script uses __logger(1)__ to write details of trigger notifications into
-the system log file (useful for testing).
 
-On most systems no further installation or configuration will be required.
+This script uses __logger(1)__ to write details of trigger
+notifications into the system log file (useful for testing).
+
+On most systems no further installation or configuration will be
+required.
 
 ### sms  
-This script uses __gammu-smsd-inject(1)__ to insert notification texts into
-the outbox of a __gammu-smsd(1)__ service which is assumed to be running on
-the host server.
 
-[Gammu](https://wammu.eu/gammu/) is part of most modern Linux distributions
-and can be installed using your system's package manager.
+This script uses __gammu-smsd-inject(1)__ to insert notification texts
+into the outbox of a __gammu-smsd(1)__ service which is assumed to be
+running on the host server.
 
-For __gammu__ to operate it requires access to either a cellular modem or
-a remotely operable cell-phone.
+[Gammu](https://wammu.eu/gammu/)
+is part of most modern Linux distributions and can be installed using
+your system's package manager.
+
+For __gammu__ to operate it requires access to either a cellular modem
+or a remotely operable cell-phone.
 The __gammu__ documentation includes a list of supported devices and
-comprehensive instructions on how to install and configure both software
-and hardware.
+comprehensive instructions on how to install and configure both
+software and hardware.
 
 The `gammu/` folder in the plugin installation directory includes some
 material which _may_ help you install __gammu-smsd__. 
 
-For my SMS connection I use a Huawei E353 USB cellular modem (purchased on
-Ebay for a few Euros) connected to a (probably unnecessary) external antenna
-(purchased from a chandler for many tens of Euros).
+For my SMS connection I use a Huawei E353 USB cellular modem (purchased
+on Ebay for a few Euros) connected to a (probably unnecessary) external
+antenna (purchased from a chandler for many tens of Euros).
+
 ## Usage
 
-__signalk-renotifier__ is confugured through the Signal K Node server plugin
-configuration interface.
+__signalk-renotifier__ is confugured through the Signal K Node server
+plugin configuration interface.
 Navigate to _Server->Plugin config_ and select the _Renotifier_ tab.
-
-![Plugin configuration screen](readme/screenshot.png)
 
 The _Active_ checkbox tells the Signal K Node server whether or not to run the
 plugin: on first execution you should check this, before reviewing and

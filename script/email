@@ -2,7 +2,7 @@
 # Send Signal K notifications by email
 # Usage: email [-n] [-l] args...
 
-FROM="Beatrice of Hull <beatrice@pdjr.eu>"
+FROM="My Vessel <myvessel@some.domain>"
 
 COMMAND="/usr/bin/mail"
 LOGGER="/usr/bin/logger"

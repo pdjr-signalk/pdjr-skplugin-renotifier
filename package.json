@@ -19,5 +19,9 @@
   "bugs": {
     "url": "https://github.com/preeve9534/signalk-renotifier/issues"
   },
-  "homepage": "https://github.com/preeve9534/signalk-renotifier#readme"
+  "homepage": "https://github.com/preeve9534/signalk-renotifier#readme",
+  "dependencies": {
+    "baconjs": "^1.0.1",
+    "sprintf-js": "^1.1.2"
+  }
 }
