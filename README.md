@@ -181,3 +181,8 @@ these will likely indicate the recipient(s) of the notification.
 For example, in the case of the `SMS` notifier script included in the
 plugin distribution this option should contain a list of the cellphone
 numbers to which notification texts should be sent.
+
+## Author
+
+Paul Reeve <preeve@pdjr.eu>\
+October 2020

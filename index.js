@@ -33,7 +33,7 @@ module.exports = function(app) {
 
   plugin.id = "renotifier";
   plugin.name = "Renotifier";
-  plugin.description = "Take external action on a Signal K notification.";
+  plugin.description = "Execute external scripts in response to Signal K notification events.";
 
   const log = new Log(plugin.id, { ncallback: app.setPluginStatus, ecallback: app.setPluginError });
   const debuglog = new DebugLog(plugin.id, DEBUG_TOKENS);
