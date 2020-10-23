@@ -1,6 +1,6 @@
 {
   "name": "signalk-renotifier",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Execute external scripts in response to Signal K notification events.",
   "main": "index.js",
   "scripts": {
