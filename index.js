@@ -40,12 +40,13 @@ module.exports = function(app) {
   const VESSEL_NAME = app.getSelfPath("name") || "Unnamed Vessel";
   const VESSEL_MMSI = app.getSelfPath("mmsi") || "--";
 
-  /**
-   * Load plugin schema from disk file and add a default list of notifiers
-   * garnered from the plugin script directory.  The names of these
-   * notifiers are saved so that they can be added as checkbox options to
-   * subsequently identified notification paths.
+  /********************************************************************
+   * Load plugin schema from disk file and add a default list of
+   * notifiers garnered from the plugin script directory. The names of
+   * these notifiers are saved so that they can be added as checkbox
+   * options to subsequently identified notification paths.
    */
+
   plugin.schema = function() {
     var schema = Schema.createSchema(PLUGIN_SCHEMA_FILE);
     var notifiers = loadNotifiers(PLUGIN_SCRIPT_DIRECTORY);
@@ -62,9 +63,11 @@ module.exports = function(app) {
   plugin.start = function(options) {
     debug.N("*", "available debug tokens: %s", debug.getKeys().join(", "));
 
-    // Check the script files available on disk and update options to
-    // reflect any changes.
-    //
+    /******************************************************************
+     * Check the script files available on disk and update options to
+     * reflect any changes.
+     */
+
     options.notifiers = loadNotifiers(PLUGIN_SCRIPT_DIRECTORY, options.notifiers);
     options.triggers.forEach(trigger => {
       trigger.notifiers = trigger.notifiers.filter(nf => options.notifiers.map(v => v.name).includes(nf));
@@ -72,11 +75,12 @@ module.exports = function(app) {
     app.savePluginOptions(options, function(err) { if (err) log.E("update of plugin options failed: " + err); });
     options.notifiers.forEach(notifier => debug.N("notifiers", "loading notifier %o", notifier));
 
-    // Start production by subscribing to the Signal K paths that are
-	// identifed in the configuration options.  Each time a notification
-	// appears on one of these streams, then offer it for action to each
-	// of the active notifier scripts.
-	//
+    /******************************************************************
+     * Filter the trigger list eliminating triggers which are impotent
+     * or otherwise invalid and produce a list of viable stream handles
+     * from the good stuff.
+     */
+
     var streams = options.triggers.reduce((a, trigger) => {
       var stream = null;
       trigger.path = (trigger.path || "").trim();
@@ -94,6 +98,12 @@ module.exports = function(app) {
       } else { log.E("discarding trigger with no path (%o)", trigger); }
       return(a);
     }, []);
+
+    /******************************************************************
+     * Start production by subscribing to the trigger streams. Each 
+     * time a trigger appears on one of these streams, invoke the
+     * active notifier scripts.
+     */
 
     if (streams.length > 0) {
       log.N("monitoring " + streams.length + " notification stream" + ((streams.length == 1)?"":"s"));
@@ -127,7 +137,9 @@ module.exports = function(app) {
   }
 
   /********************************************************************
-   * Executes <command> in a separate shell.
+   * Executes <command> in a separate shell, passing the contents of
+   * the <options> array and the <args> string as arguments. Multiple
+   * lines of data are piped into the executing command.
    */
 
   function performNotification(command, options, args, notification) {
@@ -152,7 +164,7 @@ module.exports = function(app) {
    * Constructs and returns an array of notifier definitions by
    * reconciling the contents of <directory> with the list of notifier
    * definitions passed in <notifiers>. The supplied and returned
-   * definition lists have exacyly the same structure as the "notifiers"
+   * definition list has exacyly the same structure as the "notifiers"
    * property in the plugin configuration file.
    *
    * Each file in <directory> is assumed to be a notifier script: if a
@@ -160,7 +172,7 @@ module.exports = function(app) {
    * is retained; if a script is not represented in <notifiers>, then
    * a new entry describing the script is created; is an entry exists
    * in <notifiers> but there is no corresponding script, then the
-   * entry is deleted. The reconciled <notifications> list is returned.
+   * entry is deleted.
    */
  
   function loadNotifiers(directory, notifiers = []) {
