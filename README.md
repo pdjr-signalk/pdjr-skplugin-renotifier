@@ -68,9 +68,6 @@ transfer agent like those offered by Gmail.
 The __ssmtp__ documentation provides detailed instructions on how to
 set this up.
 
-You should edit the email script file so that the FROM variable sets an
-appropriate sender email address.
-
 ### null
 
 This script uses __logger(1)__ to write details of trigger

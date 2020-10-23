@@ -3,7 +3,6 @@
 # Usage: email [-n] [-l] args...
 
 FROM="My Vessel <myvessel@some.domain>"
-
 COMMAND="/usr/bin/mail"
 LOGGER="/usr/bin/logger"
 LOG=""
@@ -53,7 +52,7 @@ END_HEREDOC
 	    logger "signalk-renotifier:email[${MODE}]: \"${MESSAGE}\" => ${COMMAND} -s ${SUBJECT} ${ADDRESSES}"
     fi
     if [ "${MODE}" == "normal" ] ; then
-	    echo -e "${MESSAGE}" | ${COMMAND} -s "${SUBJECT}" -a "From: ${FROM}" ${ADDRESSES}
+	    echo -e "${MESSAGE}" | ${COMMAND} -s "${SUBJECT}" -a "From: ${DICTIONARY[VESSEL]}" ${ADDRESSES}
     fi
 
 	exit 0

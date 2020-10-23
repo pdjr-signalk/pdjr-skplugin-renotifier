@@ -16,6 +16,7 @@
 
 const { spawn } = require('child_process');
 const { execSync } = require('child_process');
+const path = require('path');
 const fs = require('fs');
 const bacon = require('baconjs');
 const Schema = require("./lib/signalk-libschema/Schema.js");
@@ -118,7 +119,7 @@ module.exports = function(app) {
 	            var command = PLUGIN_SCRIPT_DIRECTORY + "/" + notifier['name'];
                 var options = notifier['options'];
                 var args = notifier['arguments'];
-                performNotification(command, options, args, notification.value); 
+                performNotification(command, options, args, notification.value, app.setPluginStatus, app.setPluginError); 
               } catch(e) {
                 log.E("failed to execute notification script %s", command);
               }
@@ -142,7 +143,7 @@ module.exports = function(app) {
    * lines of data are piped into the executing command.
    */
 
-  function performNotification(command, options, args, notification) {
+  function performNotification(command, options, args, notification, logN, logE) {
     var retval = null, exitcode = 0, stdout = "", stderr = "";
     var argarr = (options || []).concat((args !== undefined)?args.split(/[ ,]+/):[]);
 	var child = spawn(command, argarr, { shell: true, env: process.env });
@@ -155,8 +156,8 @@ module.exports = function(app) {
 	  child.stdin.write("MESSAGE:" + notification.message + "\n");
       child.stdin.write("TIMESTAMP:" + notification.timestamp + "\n");
       child.stdin.end();
-      child.on('close', (code) => { log.N("Notified: "); });
-	  child.on('error', (code) => { log.E("Failed"); });
+      child.on('close', (code) => { if (logN) logN("Successful renotification using '" + path.basename(command) + "'"); });
+	  child.on('error', (code) => { if (logE) logE("Renotification by '" + path.basename(command) + "' failed"); });
     }
   }
 
