@@ -51,9 +51,12 @@ module.exports = function(app) {
   plugin.schema = function() {
     var schema = Schema.createSchema(PLUGIN_SCHEMA_FILE);
     var notifiers = loadNotifiers(PLUGIN_SCRIPT_DIRECTORY);
+    debug.N("notifiers", "scanning script directory %s, found %o", PLUGIN_SCRIPT_DIRECTORY, notifiers);
+    if (notifiers.length > 0) {
       schema.insertValue("properties.notifiers.default", notifiers);
       schema.insertValue("properties.triggers.items.properties.notifiers.items.enum", notifiers.map(notifier => notifier["name"]));
-      return(schema.getSchema());
+    }
+    return(schema.getSchema());
   };
  
   plugin.uiSchema = function() {
