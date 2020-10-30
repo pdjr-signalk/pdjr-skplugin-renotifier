@@ -131,6 +131,7 @@ Specifies a Signal K notification path that should be monitored for
 notification events.
 Default is the empty string.
 Enter a full notification path (wildcards are acceptable).
+For example: "notifications.tanks.wasteWater.0".
 
 __Trigger on these notification states__\
 The notification states which should cause execution of the notifier
@@ -186,6 +187,41 @@ these will likely indicate the recipient(s) of the notification.
 For example, in the case of the `SMS` notifier script included in the
 plugin distribution this option should contain a list of the cellphone
 numbers to which notification texts should be sent.
+
+## How do I write a notifier script
+
+__signalk-renotifier__ passes information to a notifier script both as
+command line parameters and as the scripts standard input.
+
+The plugin scans its ```script/``` folder in order to generate the
+entries that you see in the plugin's configuration page. For this to
+work, you must ensure that when invoked with no command line parameters
+your script issues some text that is appropriate for use in the
+configuration page's notifier "Description" field.
+
+When invoked with command line parameters, then the script is probably
+going to actually do something. Each parameter is a value drawn from
+the __Arguments__ field discussed above: do with it what you will.
+
+Additionally, the script may be passed zero or more options.
+
+The '-n' option indicates that your script should operate in "dry run"
+mode - the idea is that it should do all that it would do in production,
+but not actually do it.
+
+The '-l' option indicates that your script should log its action to
+the system logs (logger(1) might be useful here).
+
+Finally, the script's standard input will receive five lines of text,
+of the form "*token*__:__*stuff*":
+
+| *token*   | *stuff* |
+|:----------|:--------|
+| VESSEL    | The vessel's name and MMSI. |
+| STATE     | The triggering notification state (i.e. 'normal', 'warning', etc.). |
+| METHOD    | The methods requested by the triggering notification. |
+| MESSAGE   | The message text from the triggering notification. |
+| TIMESTAMP | The timestamp from the triggering notification. |
 
 ## Debugging and logging
 

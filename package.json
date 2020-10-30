@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/preeve9534/signalk-renotifier#readme",
   "dependencies": {
+    "baconjs": "^3.0.16",
     "sprintf-js": "^1.1.2"
   },
   "directories": {
