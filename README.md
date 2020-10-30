@@ -188,28 +188,31 @@ For example, in the case of the `SMS` notifier script included in the
 plugin distribution this option should contain a list of the cellphone
 numbers to which notification texts should be sent.
 
-## How do I write a notifier script
+## How do I write a notifier script?
 
-__signalk-renotifier__ passes information to a notifier script both as
-command line parameters and as the scripts standard input.
+__signalk-renotifier__ passes information to a notifier script through
+both command line parameters and as the script's standard input.
 
-The plugin scans its ```script/``` folder in order to generate the
-entries that you see in the plugin's configuration page. For this to
-work, you must ensure that when invoked with no command line parameters
-your script issues some text that is appropriate for use in the
-configuration page's notifier "Description" field.
+A special case is when a notifier script is invoked with no parameters
+and no input.
+This is done when the plugin scans its ```script/``` folder in order to
+generate the entries that you see in the plugin's configuration page and
+the script must respond by issuing some text that is appropriate for
+use in the configuration page's notifier "Description" field.
 
-When invoked with command line parameters, then the script is probably
-going to actually do something. Each parameter is a value drawn from
-the __Arguments__ field discussed above: do with it what you will.
+When invoked with command line parameters, then the script should
+peform its substantive function.
+Each parameter is a value drawn from the __Arguments__ field discussed
+above: do with it what you will.
 
-Additionally, the script may be passed zero or more options.
+In addition to command line parameters the script may be passed zero or
+more options.
 
-The '-n' option indicates that your script should operate in "dry run"
+The '-n' option indicates that the script should operate in "dry run"
 mode - the idea is that it should do all that it would do in production,
 but not actually do it.
 
-The '-l' option indicates that your script should log its action to
+The '-l' option indicates that the script should log its action to
 the system logs (logger(1) might be useful here).
 
 Finally, the script's standard input will receive five lines of text,
