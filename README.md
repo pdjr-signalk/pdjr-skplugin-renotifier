@@ -24,13 +24,13 @@ shell script can do...
 
 ## System requirements
 
-__pdjr-skplugin-renotifier__ has no special system requirements that must be
-met prior to installation.
+__pdjr-skplugin-renotifier__ has no special system requirements that
+must be met prior to installation.
 
 ## Installation
 
-Download and install __pdjr-skplugin-renotifier__ using the _Appstore_ link
-in your Signal K Node server console.
+Download and install __pdjr-skplugin-renotifier__ using the _Appstore_
+link in your Signal K Node server console.
 The plugin can also be obtained from the 
 [project homepage](https://github.com/preeve9534/pdjr-skplugin-renotifier)
 and installed using
@@ -38,9 +38,9 @@ and installed using
 
 ### Scripts
 
-A new installation of __pdjr-skplugin-renotifier__ includes three scripts:
-_email_, _null_ and _sms_ which may provide an interface to services
-on your system.
+A new installation of __pdjr-skplugin-renotifier__ includes three
+scripts: _email_, _null_ and _sms_ which may provide an interface to
+services on your system.
 Or maybe not - perhaps you will have to tweak them to suit your
 environment.
 You can add additional scripts to the plugin by placing shell scripts
@@ -101,8 +101,8 @@ a chandler for many tens of Euros).
 
 ## Usage
 
-__pdjr-skplugin-renotifier__ is confugured through the Signal K Node server
-plugin configuration interface.
+__pdjr-skplugin-renotifier__ is confugured through the Signal K Node
+server plugin configuration interface.
 Navigate to _Server->Plugin config_ and select the _Renotifier_ tab.
 
 The _Active_ checkbox tells the Signal K Node server whether or not to
@@ -117,11 +117,9 @@ trigger paths and a list of notification scripts.
 ### Notification triggers  
 
 Each entry in this list specifies a Signal K notification path which
-may trigger execution of one or more notification script, defines the
-scripts which will be executed and the conditions under which execution
-will occur.
-New entries can be created using the __[+]__ button and unwanted entries can
-be deleted using the __[x]__ button.
+may trigger execution of one or more notification scripts, defines the
+scripts which will be executed, and the conditions under which
+execution will occur.
 
 Each notification trigger path is configured through the following
 options. 
@@ -130,8 +128,7 @@ __Notification path__\
 Specifies a Signal K notification path that should be monitored for
 notification events.
 Default is the empty string.
-Enter a full notification path (wildcards are acceptable).
-For example: "notifications.tanks.wasteWater.0".
+Enter a full notification path (for example: 'notifications.tanks.wasteWater.0').
 
 __Trigger on these notification states__\
 The notification states which should cause execution of the notifier
@@ -190,8 +187,9 @@ numbers to which notification texts should be sent.
 
 ## How do I write a notifier script?
 
-__pdjr-skplugin-renotifier__ passes information to a notifier script through
-both command line parameters and as the script's standard input.
+__pdjr-skplugin-renotifier__ passes information to a notifier script
+through both command line parameters and as the script's standard
+input.
 
 A special case is when a notifier script is invoked with no parameters
 and no input.
@@ -228,14 +226,8 @@ of the form "*token*__:__*stuff*":
 
 ## Debugging and logging
 
-The plugin understands the following debug keys.
-
-| Key                  | Meaning                                              |
-|:---------------------|:-----------------------------------------------------|
-| renotifier:\*        | Enable all keys.                                     |
-| renotifier:triggers  | Log notification trigger paths loaded by the plugin. |
-| renotifier:notifiers | Log notifier scripts accessible to the plugin.       |
-
+The plugin responds to the debug key 'pdjr-skplugin-renotifier' by
+writing information to the system log.
 
 ## Author
 

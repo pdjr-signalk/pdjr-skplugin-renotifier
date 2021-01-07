@@ -1,7 +1,7 @@
 {
   "name": "pdjr-skplugin-renotifier",
   "version": "1.0.1",
-  "description": "Execute external scripts in response to Signal K notification events.",
+  "description": "Execute external scripts in response to Signal K notification events",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/preeve9534/pdjr-skplugin-renotifier#readme",
   "dependencies": {
-    "baconjs": "^3.0.16",
+    "baconjs": "^3.0.17",
     "sprintf-js": "^1.1.2"
   },
   "directories": {
