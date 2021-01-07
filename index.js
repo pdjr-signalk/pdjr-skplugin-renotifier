@@ -21,23 +21,20 @@ const fs = require('fs');
 const bacon = require('baconjs');
 const Schema = require("./lib/signalk-libschema/Schema.js");
 const Log = require("./lib/signalk-liblog/Log.js");
-const DebugLog = require("./lib/signalk-liblog/DebugLog.js");
 
 const PLUGIN_SCHEMA_FILE = __dirname + "/schema.json";
 const PLUGIN_UISCHEMA_FILE = __dirname + "/uischema.json";
 const PLUGIN_SCRIPT_DIRECTORY = __dirname + "/script";
-const DEBUG_TOKENS = [ "triggers", "notifiers" ];
 
 module.exports = function(app) {
   var plugin = {};
   var unsubscribes = [];
 
-  plugin.id = "renotifier";
+  plugin.id = "pdjr-skplugin-renotifier";
   plugin.name = "Renotifier";
   plugin.description = "Execute external scripts in response to Signal K notification events.";
 
   const log = new Log(plugin.id, { ncallback: app.setPluginStatus, ecallback: app.setPluginError });
-  const debug = new DebugLog(plugin.id, DEBUG_TOKENS);
   const VESSEL_NAME = app.getSelfPath("name") || "Unnamed Vessel";
   const VESSEL_MMSI = app.getSelfPath("mmsi") || "--";
 
@@ -51,7 +48,7 @@ module.exports = function(app) {
   plugin.schema = function() {
     var schema = Schema.createSchema(PLUGIN_SCHEMA_FILE);
     var notifiers = loadNotifiers(PLUGIN_SCRIPT_DIRECTORY);
-    debug.N("notifiers", "scanning script directory %s, found %o", PLUGIN_SCRIPT_DIRECTORY, notifiers);
+    app.debug("scanning script directory %s, found %o", PLUGIN_SCRIPT_DIRECTORY, notifiers);
     if (notifiers.length > 0) {
       schema.insertValue("properties.notifiers.default", notifiers);
       schema.insertValue("properties.triggers.items.properties.notifiers.items.enum", notifiers.map(notifier => notifier["name"]));
@@ -65,7 +62,6 @@ module.exports = function(app) {
   }
 
   plugin.start = function(options) {
-    debug.N("*", "available debug tokens: %s", debug.getKeys().join(", "));
 
     /******************************************************************
      * Check the script files available on disk and update options to
@@ -77,7 +73,7 @@ module.exports = function(app) {
       trigger.notifiers = trigger.notifiers.filter(nf => options.notifiers.map(v => v.name).includes(nf));
     });
     app.savePluginOptions(options, function(err) { if (err) log.E("update of plugin options failed: " + err); });
-    options.notifiers.forEach(notifier => debug.N("notifiers", "loading notifier %o", notifier));
+    options.notifiers.forEach(notifier => app.debug("notifiers", "loading notifier %o", notifier));
 
     /******************************************************************
      * Filter the trigger list eliminating triggers which are impotent
@@ -90,7 +86,7 @@ module.exports = function(app) {
       trigger.path = (trigger.path || "").trim();
       trigger.conditions = trigger.conditions || [];
       trigger.notifiers = trigger.notifiers || [];
-      debug.N("triggers", "loading trigger %o", trigger);
+      app.debug("triggers", "loading trigger %o", trigger);
       if (trigger.path != "") {
         if (trigger.conditions.length > 0) { 
           if (trigger.notifiers.length > 0) { 
@@ -118,7 +114,7 @@ module.exports = function(app) {
           if (conditions.includes(notification.value.state)) {
             options.notifiers.filter(notifier => (notifiers.includes(notifier.name))).forEach(notifier => {
               try {
-                debug.N("triggers", "executing notification script %s", command);
+                app.debug("triggers", "executing notification script %s", command);
 	            var command = PLUGIN_SCRIPT_DIRECTORY + "/" + notifier['name'];
                 var options = notifier['options'];
                 var args = notifier['arguments'];

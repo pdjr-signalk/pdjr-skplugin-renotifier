@@ -1,5 +1,5 @@
 {
-  "name": "signalk-renotifier",
+  "name": "pdjr-skplugin-renotifier",
   "version": "1.0.1",
   "description": "Execute external scripts in response to Signal K notification events.",
   "main": "index.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/preeve9534/signalk-renotifier.git"
+    "url": "git+https://github.com/preeve9534/pdjr-skplugin-renotifier.git"
   },
   "keywords": [
     "signalk-node-server-plugin",
@@ -18,9 +18,9 @@
   "author": "Paul Reeve <preeve@pdjr.eu>",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/preeve9534/signalk-renotifier/issues"
+    "url": "https://github.com/preeve9534/pdjr-skplugin-renotifier/issues"
   },
-  "homepage": "https://github.com/preeve9534/signalk-renotifier#readme",
+  "homepage": "https://github.com/preeve9534/pdjr-skplugin-renotifier#readme",
   "dependencies": {
     "baconjs": "^3.0.16",
     "sprintf-js": "^1.1.2"

@@ -1,4 +1,4 @@
-# signalk-renotifier
+# pdjr-skplugin-renotifier
 
 Execute external scripts in response to Signal K notification events.
 
@@ -8,7 +8,7 @@ This project implements a plugin for the
 Reading the [Alarm, alert and notification handling](http://signalk.org/specification/1.0.0/doc/notifications.html)
 section of the Signal K documentation may provide helpful orientation.
 
-__signalk-renotifier__ was developed to satisfy a requirement for
+__pdjr-skplugin-renotifier__ was developed to satisfy a requirement for
 re-distribution of Signal K notifications over at least email and SMS.
 
 The simplest way of achieving this was to provide a generic interface
@@ -24,21 +24,21 @@ shell script can do...
 
 ## System requirements
 
-__signalk-renotifier__ has no special system requirements that must be
+__pdjr-skplugin-renotifier__ has no special system requirements that must be
 met prior to installation.
 
 ## Installation
 
-Download and install __signalk-renotifier__ using the _Appstore_ link
+Download and install __pdjr-skplugin-renotifier__ using the _Appstore_ link
 in your Signal K Node server console.
 The plugin can also be obtained from the 
-[project homepage](https://github.com/preeve9534/signalk-renotifier)
+[project homepage](https://github.com/preeve9534/pdjr-skplugin-renotifier)
 and installed using
 [these instructions](https://github.com/SignalK/signalk-server-node/blob/master/SERVERPLUGINS.md).
 
 ### Scripts
 
-A new installation of __signalk-renotifier__ includes three scripts:
+A new installation of __pdjr-skplugin-renotifier__ includes three scripts:
 _email_, _null_ and _sms_ which may provide an interface to services
 on your system.
 Or maybe not - perhaps you will have to tweak them to suit your
@@ -101,7 +101,7 @@ a chandler for many tens of Euros).
 
 ## Usage
 
-__signalk-renotifier__ is confugured through the Signal K Node server
+__pdjr-skplugin-renotifier__ is confugured through the Signal K Node server
 plugin configuration interface.
 Navigate to _Server->Plugin config_ and select the _Renotifier_ tab.
 
@@ -190,7 +190,7 @@ numbers to which notification texts should be sent.
 
 ## How do I write a notifier script?
 
-__signalk-renotifier__ passes information to a notifier script through
+__pdjr-skplugin-renotifier__ passes information to a notifier script through
 both command line parameters and as the script's standard input.
 
 A special case is when a notifier script is invoked with no parameters
