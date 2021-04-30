@@ -108,6 +108,7 @@ module.exports = function(app) {
     if (streams.length > 0) {
       log.N("monitoring " + streams.length + " notification stream" + ((streams.length == 1)?"":"s"));
       unsubscribes.push(bacon.mergeAll(streams).onValue(notification => {
+console.log(">>>>>>>>>>>>>>>>>>> %o", notification);
         if (notification.value != null) {
           var conditions = options.triggers.reduce((a,trigger) => ((trigger.path == notification.path)?trigger.conditions:a), []);
           var notifiers = options.triggers.reduce((a,trigger) => ((trigger.path == notification.path)?trigger.notifiers:a), []);
